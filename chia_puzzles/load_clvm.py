@@ -82,7 +82,7 @@ def load_clvm_bytes(
     """
     This function takes a .clsp file in the given package and compiles it to a
     .clsp.hex file if the .hex file is missing or older than the .clsp file, then
-    returns the contents of the .hex file as a `Program`.
+    returns the contents of the .hex file as bytes.
 
     clvm_filename: file name
     package_or_requirement: usually `__name__` if the clvm file is in the same package

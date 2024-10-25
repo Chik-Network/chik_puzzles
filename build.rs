@@ -1,8 +1,8 @@
-use std::fs;
-use std::path::Path;
 use hex::decode;
+use std::fs;
 use std::fs::File;
 use std::io::{BufWriter, Write};
+use std::path::Path;
 
 fn main() {
     let chialisp_dictionary = [
@@ -74,15 +74,14 @@ fn main() {
     let f = File::create(dest_path).expect("unable to create file");
     let mut f = BufWriter::new(f);
 
-    for (name, file_path) in chialisp_dictionary{
+    for (name, file_path) in chialisp_dictionary {
         let hex_file_path = Path::new(file_path);
 
-        let hex_data = fs::read_to_string(hex_file_path)
-            .expect("Failed to read the hex file");
+        let hex_data = fs::read_to_string(hex_file_path).expect("Failed to read the hex file");
 
         println!("Loaded hex data from {}: {}", name, hex_data);
 
-        let hex_data = hex_data.trim().replace('\n', "").replace('\r', "");
+        let hex_data = hex_data.trim().replace(['\n', '\r'], "");
 
         let bytes = decode(&hex_data).expect("Failed to decode hex string");
 
@@ -98,6 +97,7 @@ fn main() {
             name,
             bytes.len(),
             byte_array_string
-        ).expect("Failed to write to loaded_chialisp.rs");
+        )
+        .expect("Failed to write to loaded_chialisp.rs");
     }
 }
