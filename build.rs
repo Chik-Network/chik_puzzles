@@ -34,6 +34,10 @@ fn main() {
         ("NFT_OWNERSHIP_LAYER", "./chia_puzzles/puzzles/nft_puzzles/nft_ownership_layer.clsp.hex"),
         ("NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES", "./chia_puzzles/puzzles/nft_puzzles/nft_ownership_transfer_program_one_way_claim_with_royalties.clsp.hex"),
         ("NFT_STATE_LAYER", "./chia_puzzles/puzzles/nft_puzzles/nft_state_layer.clsp.hex"),
+        // CR Puzzles
+        ("CONDITIONS_W_FEE_ANNOUNCE", "./chia_puzzles/puzzles/vc_puzzles/cr_puzzles/conditions_w_fee_announce.clsp.hex"),
+        ("CREDENTIAL_RESTRICTION", "./chia_puzzles/puzzles/vc_puzzles/cr_puzzles/credential_restriction.clsp.hex"),
+        ("FLAG_PROOFS_CHECKER", "./chia_puzzles/puzzles/vc_puzzles/cr_puzzles/flag_proofs_checker.clsp.hex"),
         // VC Puzzles
         ("COVENANT_LAYER", "./chia_puzzles/puzzles/vc_puzzles/covenant_layer.clsp.hex"),
         ("EML_COVENANT_MORPHER", "./chia_puzzles/puzzles/vc_puzzles/eml_covenant_morpher.clsp.hex"),
