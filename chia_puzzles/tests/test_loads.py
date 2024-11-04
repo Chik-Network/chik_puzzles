@@ -1,4 +1,4 @@
-from chia_puzzles.programs import GENESIS_BY_ID_MOD
+from chia_puzzles.programs import CAT_PUZZLE
 
 def test_import():
-    assert GENESIS_BY_ID_MOD is not None
+    assert CAT_PUZZLE is not None
