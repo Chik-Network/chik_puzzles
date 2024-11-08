@@ -18,7 +18,7 @@ clvm_suffix = ".clvm"
 clsp_suffix = ".clsp"
 hex_suffix = ".clsp.hex"
 all_suffixes = {"clsp": clsp_suffix, "hex": hex_suffix, "clvm": clvm_suffix}
-top_levels = {"chia"}
+top_levels = {"chia_puzzles"}
 hashes_path = root.joinpath("chia-puzzles/deployed_puzzle_hashes.json")
 std_libraries = root.joinpath("chia-puzzles/puzzles")
 
@@ -77,6 +77,7 @@ def test_check(use_cache: bool) -> int:
     cache_modified = False
 
     found_stems = find_stems(top_levels)
+    assert len(found_stems["hex"]) > 20
     found = found_stems["hex"]
     suffix = all_suffixes["hex"]
     extra = found - found_stems["clsp"]
@@ -104,7 +105,7 @@ def test_check(use_cache: bool) -> int:
                         overall_fail = True
                         print(f"FAIL    : {stem_path.name + clvm_suffix} contains `(mod`")
                     break
-
+    breakpoint()
     missing_files: typing.List[str] = []
     all_hash_stems: typing.List[str] = []
 
