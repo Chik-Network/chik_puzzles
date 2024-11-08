@@ -4,6 +4,8 @@ import pathlib
 import tempfile
 import traceback
 import typing
+
+import pytest
 from chia_puzzles.load_clvm import compile_clvm
 from chia_puzzles.programs import CAT_PUZZLE
 from chia_puzzles.manage_clvm import Cache, ClvmBytes, ClvmPaths, ManageClvmError, create_cache_entry, create_empty_cache, dump_cache, find_stems, load_cache
@@ -43,6 +45,10 @@ class WrongCacheVersionError(CacheVersionError):
 def test_import():
     assert CAT_PUZZLE is not None
 
+@pytest.mark.parametrize(
+        "use_cache",
+        [True, False],
+    )
 def test_check(use_cache: bool) -> int:
     used_excludes = set()
     overall_fail = False
