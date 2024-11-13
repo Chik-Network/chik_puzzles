@@ -23,9 +23,15 @@ class Lockfile:
     poll_interval: float
 
     @classmethod
-    def create(cls, path: Path, timeout: float = -1, poll_interval: float = 0.05) -> Lockfile:
+    def create(
+        cls, path: Path, timeout: float = -1, poll_interval: float = 0.05
+    ) -> Lockfile:
         path.parent.mkdir(parents=True, exist_ok=True)
-        return cls(_lock=FileLock(path.with_name(path.name + ".lock")), timeout=timeout, poll_interval=poll_interval)
+        return cls(
+            _lock=FileLock(path.with_name(path.name + ".lock")),
+            timeout=timeout,
+            poll_interval=poll_interval,
+        )
 
     def __enter__(self) -> Lockfile:
         self.acquire(timeout=self.timeout, poll_interval=self.poll_interval)

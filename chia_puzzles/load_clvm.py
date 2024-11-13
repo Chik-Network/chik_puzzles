@@ -15,7 +15,8 @@ from chia_puzzles.lock import Lockfile
 compile_clvm_py = None
 
 recompile_requested = (
-    (os.environ.get("CHIA_DEV_COMPILE_CLVM_ON_IMPORT", "") != "") or ("pytest" in sys.modules)
+    (os.environ.get("CHIA_DEV_COMPILE_CLVM_ON_IMPORT", "") != "")
+    or ("pytest" in sys.modules)
 ) and os.environ.get("CHIA_DEV_COMPILE_CLVM_DISABLED", None) is None
 
 here_name = __name__.rpartition(".")[0]
@@ -37,7 +38,9 @@ if "CLVM_TOOLS" in os.environ:
     compile_clvm_py = compile_clvm_py_candidate
 
 
-def compile_clvm_in_lock(full_path: pathlib.Path, output: pathlib.Path, search_paths: list[pathlib.Path]):
+def compile_clvm_in_lock(
+    full_path: pathlib.Path, output: pathlib.Path, search_paths: list[pathlib.Path]
+):
     # Compile using rust (default)
 
     # Ensure path translation is done in the idiomatic way currently
@@ -46,7 +49,11 @@ def compile_clvm_in_lock(full_path: pathlib.Path, output: pathlib.Path, search_p
     treated_include_paths = list(map(translate_path, search_paths))
     res = compile_clvm_rust(str(full_path), str(output), treated_include_paths)
 
-    if "CLVM_TOOLS" in os.environ and os.environ["CLVM_TOOLS"] == "check" and compile_clvm_py is not None:
+    if (
+        "CLVM_TOOLS" in os.environ
+        and os.environ["CLVM_TOOLS"] == "check"
+        and compile_clvm_py is not None
+    ):
         # Simple helper to read the compiled output
         def sha256file(f):
             import hashlib
@@ -72,12 +79,20 @@ def compile_clvm_in_lock(full_path: pathlib.Path, output: pathlib.Path, search_p
     return res
 
 
-def compile_clvm(full_path: pathlib.Path, output: pathlib.Path, search_paths: list[pathlib.Path] = []):
-    with Lockfile.create(pathlib.Path(tempfile.gettempdir()) / "clvm_compile" / full_path):
+def compile_clvm(
+    full_path: pathlib.Path, output: pathlib.Path, search_paths: list[pathlib.Path] = []
+):
+    with Lockfile.create(
+        pathlib.Path(tempfile.gettempdir()) / "clvm_compile" / full_path
+    ):
         compile_clvm_in_lock(full_path, output, search_paths)
 
+
 def load_clvm_bytes(
-    clvm_filename, package_or_requirement=here_name, include_standard_libraries: bool = True, recompile: bool = True
+    clvm_filename,
+    package_or_requirement=here_name,
+    include_standard_libraries: bool = True,
+    recompile: bool = True,
 ) -> bytes:
     """
     This function takes a .clsp file in the given package and compiles it to a
@@ -97,7 +112,10 @@ def load_clvm_bytes(
         if full_path.exists():
             # Establish whether the size is zero on entry
             output = full_path.parent / hex_filename
-            if not output.exists() or os.stat(full_path).st_mtime > os.stat(output).st_mtime:
+            if (
+                not output.exists()
+                or os.stat(full_path).st_mtime > os.stat(output).st_mtime
+            ):
                 search_paths = [full_path.parent]
                 if include_standard_libraries:
                     # we can't get the dir, but we can get a file then get its parent.
@@ -110,4 +128,3 @@ def load_clvm_bytes(
     assert len(clvm_hex.strip()) != 0
     clvm_blob = bytes.fromhex(clvm_hex)
     return clvm_blob
-
