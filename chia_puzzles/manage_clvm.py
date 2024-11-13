@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import io
 import json
 import pathlib
 import tempfile
@@ -11,6 +12,7 @@ import typing_extensions
 
 from clvm_tools_rs import compile_clvm
 from clvm.SExp import SExp
+from clvm.serialize import sexp_from_stream
 from clvm.CLVMObject import CLVMStorage
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -124,7 +126,7 @@ def dump_cache(cache: Cache, file: typing.IO[str]) -> None:
 
 def generate_hash_bytes(hex_bytes: bytes) -> bytes:
     cleaned_blob = bytes.fromhex(hex_bytes.decode("utf-8"))
-    serialized_hash = sha256_treehash(cleaned_blob)
+    serialized_hash = sha256_treehash(SExp.to(cleaned_blob))
     return serialized_hash
 
 @dataclasses.dataclass(frozen=True)
@@ -154,6 +156,13 @@ class ClvmBytes:
         return cls(
             hex=hex_bytes,
             hash=generate_hash_bytes(hex_bytes=hex_bytes)
+        )
+    
+    @classmethod
+    def from_hex_bytes(cls, hex_bytes: bytes) -> ClvmBytes:
+        return cls(
+            hex=hex_bytes,
+            hash=generate_hash_bytes(hex_bytes=hex_bytes),
         )
 
 def find_stems(top_levels: set[str], suffixes: typing.Mapping[str, str] = all_suffixes) -> dict[str, set[pathlib.Path]]:

@@ -73,7 +73,7 @@ def compile_clvm_in_lock(full_path: pathlib.Path, output: pathlib.Path, search_p
 
 
 def compile_clvm(full_path: pathlib.Path, output: pathlib.Path, search_paths: list[pathlib.Path] = []):
-    with Lockfile.create(pathlib.Path(tempfile.gettempdir()) / "clvm_compile" / full_path.name):
+    with Lockfile.create(pathlib.Path(tempfile.gettempdir()) / "clvm_compile" / full_path):
         compile_clvm_in_lock(full_path, output, search_paths)
 
 def load_clvm_bytes(
