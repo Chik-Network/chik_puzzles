@@ -124,13 +124,7 @@ fn main() {
             .collect::<Vec<_>>()
             .join("");
 
-        writeln!(
-            python_writer,
-            "{} = b\"{}\"",
-            name,
-            python_bytes_literal,
-        )
-        .expect("Failed to write to loaded_chialisp.py");
-
+        writeln!(python_writer, "{} = b\"{}\"", name, python_bytes_literal,)
+            .expect("Failed to write to loaded_chialisp.py");
     }
 }
