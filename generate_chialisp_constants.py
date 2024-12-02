@@ -1,19 +1,16 @@
-use hex::decode;
-use std::fs;
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use std::path::Path;
+import os
+from pathlib import Path
 
-fn main() {
-    let chialisp_dictionary = [
-        // CAT Puzzles
+# Define the Chialisp dictionary
+chialisp_dictionary = [
+        # CAT Puzzles
         ("CAT_PUZZLE", "./puzzles/cat_puzzles/cat_v2.clsp.hex"),
         ("DELEGATED_TAIL", "./puzzles/cat_puzzles/delegated_tail.clsp.hex"),
         ("EVERYTHING_WITH_SIGNATURE", "./puzzles/cat_puzzles/everything_with_signature.clsp.hex"),
         ("GENESIS_BY_COIN_ID_OR_SINGLETON", "./puzzles/cat_puzzles/genesis_by_coin_id_or_singleton.clsp.hex"),
         ("GENESIS_BY_COIN_ID", "./puzzles/cat_puzzles/genesis_by_coin_id.clsp.hex"),
         ("GENESIS_BY_PUZZLE_HASH", "./puzzles/cat_puzzles/genesis_by_puzzle_hash.clsp.hex"),
-        // DAO Puzzles
+        # DAO Puzzles
         ("DAO_CAT_EVE", "./puzzles/dao_puzzles/dao_cat_eve.clsp.hex"),
         ("DAO_CAT_LAUNCHER", "./puzzles/dao_puzzles/dao_cat_launcher.clsp.hex"),
         ("DAO_FINISHED_STATE", "./puzzles/dao_puzzles/dao_finished_state.clsp.hex"),
@@ -24,9 +21,9 @@ fn main() {
         ("DAO_SPEND_P2_SINGLETON", "./puzzles/dao_puzzles/dao_spend_p2_singleton_v2.clsp.hex"),
         ("DAO_TREASURY", "./puzzles/dao_puzzles/dao_treasury.clsp.hex"),
         ("DAO_UPDATE_PROPOSAL", "./puzzles/dao_puzzles/dao_update_proposal.clsp.hex"), 
-        // DID Puzzles
+        # DID Puzzles
         ("DID_INNERPUZ", "./puzzles/did_puzzles/did_innerpuz.clsp.hex"),
-        // NFT Puzzles
+        # NFT Puzzles
         ("CREATE_NFT_LAUNCHER_FROM_DID", "./puzzles/nft_puzzles/create_nft_launcher_from_did.clsp.hex"),
         ("NFT_INTERMEDIATE_LAUNCHER", "./puzzles/nft_puzzles/nft_intermediate_launcher.clsp.hex"),
         ("NFT_METADATA_UPDATER_DEFAULT", "./puzzles/nft_puzzles/nft_metadata_updater_default.clsp.hex"),
@@ -34,11 +31,11 @@ fn main() {
         ("NFT_OWNERSHIP_LAYER", "./puzzles/nft_puzzles/nft_ownership_layer.clsp.hex"),
         ("NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES", "./puzzles/nft_puzzles/nft_ownership_transfer_program_one_way_claim_with_royalties.clsp.hex"),
         ("NFT_STATE_LAYER", "./puzzles/nft_puzzles/nft_state_layer.clsp.hex"),
-        // CR Puzzles
+        # CR Puzzles
         ("CONDITIONS_W_FEE_ANNOUNCE", "./puzzles/vc_puzzles/cr_puzzles/conditions_w_fee_announce.clsp.hex"),
         ("CREDENTIAL_RESTRICTION", "./puzzles/vc_puzzles/cr_puzzles/credential_restriction.clsp.hex"),
         ("FLAG_PROOFS_CHECKER", "./puzzles/vc_puzzles/cr_puzzles/flag_proofs_checker.clsp.hex"),
-        // VC Puzzles
+        # VC Puzzles
         ("COVENANT_LAYER", "./puzzles/vc_puzzles/covenant_layer.clsp.hex"),
         ("EML_COVENANT_MORPHER", "./puzzles/vc_puzzles/eml_covenant_morpher.clsp.hex"),
         ("EML_TRANSFER_PROGRAM_COVENANT_ADAPTER", "./puzzles/vc_puzzles/eml_transfer_program_covenant_adapter.clsp.hex"),
@@ -48,7 +45,7 @@ fn main() {
         ("STANDARD_VC_BACKDOOR_PUZZLE", "./puzzles/vc_puzzles/standard_vc_backdoor_puzzle.clsp.hex"),
         ("STD_PARENT_MORPHER", "./puzzles/vc_puzzles/std_parent_morpher.clsp.hex"),
         ("VIRAL_BACKDOOR", "./puzzles/vc_puzzles/viral_backdoor.clsp.hex"),
-        // Misc Puzzles
+        # Misc Puzzles
         ("AUGMENTED_CONDITION", "./puzzles/augmented_condition.clsp.hex"),
         ("NOTIFICATION", "./puzzles/notification.clsp.hex"),
         ("P2_1_OF_N", "./puzzles/p2_1_of_n.clsp.hex"),
@@ -63,68 +60,48 @@ fn main() {
         ("P2_SINGLETON_VIA_DELEGATED_PUZZLE", "./puzzles/p2_singleton_via_delegated_puzzle.clsp.hex"),
         ("P2_SINGLETON", "./puzzles/p2_singleton.clsp.hex"),
         ("SETTLEMENT_PAYMENT", "./puzzles/settlement_payments.clsp.hex"),
-        // Singleton Puzzle
+        # Singleton Puzzle
         ("SINGLETON_LAUNCHER", "./puzzles/singleton_launcher.clsp.hex"),
         ("SINGLETON_TOP_LAYER_V1_1", "./puzzles/singleton_top_layer_v1_1.clsp.hex"),
         ("SINGLETON_TOP_LAYER", "./puzzles/singleton_top_layer.clsp.hex"),
+    ]
 
+# File paths for generated files
+rust_dest_path = Path("./src/loaded_chialisp.rs")
+python_dest_path = Path("./chia_puzzles_py/programs.py")
 
-    ];
-    let dest_path = Path::new("./src/loaded_chialisp.rs");
-    let rust_file = File::create(dest_path).expect("unable to create file");
-    let mut rust_writer = BufWriter::new(rust_file);
+# Ensure the output directory exists
+os.makedirs(rust_dest_path.parent, exist_ok=True)
+os.makedirs(python_dest_path.parent, exist_ok=True)
 
-    let python_dest_path = Path::new("./chia_puzzles_py/programs.py");
+# Create and write to the Rust file
+with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
+    # Write Python file header
+    python_file.write("# Auto-generated Python file with loaded Chialisp constants\n\n")
+    rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n\n")
 
-    let python_file = File::create(python_dest_path).expect("unable to create Python file");
+    for name, file_path in chialisp_dictionary:
+        try:
+            with open(file_path, "r") as hex_file:
+                hex_data = hex_file.read().strip().replace("\n", "").replace("\r", "")
 
-    let mut python_writer = BufWriter::new(python_file);
+            bytes_data = bytes.fromhex(hex_data)
 
-    writeln!(
-        python_writer,
-        "# Auto-generated Python file with loaded Chialisp constants\n"
-    )
-    .expect("Failed to write to Python file");
+            rust_byte_array_string = ", ".join(f"0x{byte:02x}" for byte in bytes_data)
+            rust_file.write(
+                f"pub const {name}: [u8; {len(bytes_data)}] = [{rust_byte_array_string}];\n"
+            )
 
-    writeln!(
-        rust_writer,
-        "// Auto-generated Rust file with loaded Chialisp constants\n"
-    )
-    .expect("Failed to write to Python file");
+            python_bytes_literal = "".join(f"\\x{byte:02x}" for byte in bytes_data)
+            python_file.write(
+                f"{name} = b\"{python_bytes_literal}\"\n"
+            )
 
-    for (name, file_path) in chialisp_dictionary {
-        let hex_file_path = Path::new(file_path);
+            print(f"Processed {name} from {file_path}")
 
-        let hex_data = fs::read_to_string(hex_file_path).expect("Failed to read the hex file");
+        except FileNotFoundError:
+            print(f"File not found: {file_path}")
+        except Exception:
+            print(f"Failed to decode hex data in file: {file_path}")
 
-        println!("Loaded hex data from {}: {}", name, hex_data);
-
-        let hex_data = hex_data.trim().replace(['\n', '\r'], "");
-
-        let bytes = decode(&hex_data).expect("Failed to decode hex string");
-
-        let byte_array_string = bytes
-            .iter()
-            .map(|byte| format!("0x{:02x}", byte))
-            .collect::<Vec<_>>()
-            .join(", ");
-
-        writeln!(
-            rust_writer,
-            "pub const {}: [u8; {}] = [{}];",
-            name,
-            bytes.len(),
-            byte_array_string
-        )
-        .expect("Failed to write to loaded_chialisp.rs");
-
-        let python_bytes_literal = bytes
-            .iter()
-            .map(|byte| format!("\\x{:02x}", byte))
-            .collect::<Vec<_>>()
-            .join("");
-
-        writeln!(python_writer, "{} = b\"{}\"", name, python_bytes_literal,)
-            .expect("Failed to write to loaded_chialisp.py");
-    }
-}
+print(f"Rust and Python files generated successfully:\n- {rust_dest_path}\n- {python_dest_path}")
