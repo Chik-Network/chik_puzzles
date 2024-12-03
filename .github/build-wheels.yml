@@ -1,0 +1,152 @@
+name: Python wheels
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  pull_request:
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('{0}-{1}', github.workflow_ref, github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-wheels:
+    name: Wheel - ${{ matrix.os.name }} ${{ matrix.python.major-dot-minor }} ${{ matrix.arch.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - name: macOS
+            matrix: macos
+            runs-on:
+              arm: [macOS, ARM64]
+              intel: [macos-13]
+          - name: Ubuntu
+            matrix: ubuntu
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
+          - name: Windows
+            matrix: windows
+            runs-on:
+              intel: [windows-latest]
+        python:
+          - major-dot-minor: "3.9"
+            cibw-build: "cp39-*"
+            by-arch:
+              arm:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-aarch64
+                rustup-target: aarch64-unknown-linux-musl
+              intel:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-x86_64
+                rustup-target: x86_64-unknown-linux-musl
+            matrix: "3.9"
+          - major-dot-minor: "3.10"
+            cibw-build: "cp310-*"
+            by-arch:
+              arm:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-aarch64
+                rustup-target: aarch64-unknown-linux-musl
+              intel:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-x86_64
+                rustup-target: x86_64-unknown-linux-musl
+            matrix: "3.10"
+          - major-dot-minor: "3.11"
+            cibw-build: "cp311-*"
+            by-arch:
+              arm:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-aarch64
+                rustup-target: aarch64-unknown-linux-musl
+              intel:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-x86_64
+                rustup-target: x86_64-unknown-linux-musl
+            matrix: "3.11"
+          - major-dot-minor: "3.12"
+            cibw-build: "cp312-*"
+            by-arch:
+              arm:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-aarch64
+                rustup-target: aarch64-unknown-linux-musl
+              intel:
+                manylinux-version: 2_28
+                docker-url: ghcr.io/chia-network/build-images/centos-pypa-rust-x86_64
+                rustup-target: x86_64-unknown-linux-musl
+            matrix: "3.12"
+
+        arch:
+          - name: ARM
+            matrix: arm
+          - name: Intel
+            matrix: intel
+        exclude:
+          # Only partial entries are required here by GitHub Actions so generally I
+          # only specify the `matrix:` entry.  The super linter complains so for now
+          # all entries are included to avoid that.  Reported at
+          # https://github.com/github/super-linter/issues/3016
+          - os:
+              name: Windows
+              matrix: windows
+              runs-on:
+                intel: [windows-latest]
+            arch:
+              name: ARM
+              matrix: arm
+
+    steps:
+      - name: Clean workspace
+        uses: Chia-Network/actions/clean-workspace@main
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Chia-Network/actions/setup-python@main
+        with:
+          python-version: ${{ matrix.python.major-dot-minor }}
+
+      - name: Update pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Set up rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: |
+          python -m pip install uv
+          uv sync
+
+  check-typestubs:
+    name: Check chia_rs.pyi
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Chia-Network/actions/setup-python@main
+
+      - name: check generated chia_rs.pyi
+        run: |
+          uv run generate_chialisp_constants.py
+          git diff --exit-code

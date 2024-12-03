@@ -2,7 +2,6 @@
 name = "chia_puzzles"
 version = "0.1.0"
 description = "A collection of the currently deployed ChiaLisp puzzles."
-authors = ["Matthew Howard <matt@chia.net>"]
 readme = "README.md"
 dependencies = [
     "clvm-tools>=0.4.10",
