@@ -133,6 +133,10 @@ jobs:
         run: |
           python -m pip install uv
           uv sync
+      
+      - name: cargo build
+        run: |
+          cargo build
 
   check-typestubs:
     name: Check chia_rs.pyi
@@ -150,3 +154,10 @@ jobs:
         run: |
           python generate_chialisp_constants.py
           git diff --exit-code
+
+      - name: pytest
+          run: |
+            uv run pytest -n 0 chia_puzzles_py/_tests/
+      
+      - name: cargo
+          run: cargo test --all
