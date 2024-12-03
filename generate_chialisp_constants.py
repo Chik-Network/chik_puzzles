@@ -74,9 +74,7 @@ python_dest_path = Path("./chia_puzzles_py/programs.py")
 os.makedirs(rust_dest_path.parent, exist_ok=True)
 os.makedirs(python_dest_path.parent, exist_ok=True)
 
-# Create and write to the Rust file
 with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
-    # Write Python file header
     python_file.write("# Auto-generated Python file with loaded Chialisp constants\n\n")
     rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n\n")
 
