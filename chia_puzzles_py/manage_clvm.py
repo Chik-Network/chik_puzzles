@@ -13,7 +13,7 @@ import typing_extensions
 from clvm.CLVMObject import CLVMStorage
 from clvm.serialize import sexp_from_stream
 from clvm.SExp import SExp
-from clvm_tools_rs import compile_clvm
+# from clvm_tools_rs import compile_clvm
 
 here = pathlib.Path(__file__).parent.resolve()
 root = here.parent
