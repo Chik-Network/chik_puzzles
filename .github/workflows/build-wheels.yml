@@ -165,4 +165,5 @@ jobs:
             uv run pytest -n 0 chia_puzzles_py/_tests/
       
       - name: cargo
-          run: cargo test --all
+          run: |
+            cargo test --all
