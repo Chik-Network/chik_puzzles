@@ -138,8 +138,8 @@ jobs:
         run: |
           cargo build
 
-  check-typestubs:
-    name: Check chia_rs.pyi
+  check-puzzles:
+    name: Check generated puzzles
     runs-on: ubuntu-latest
 
     steps:
@@ -150,10 +150,15 @@ jobs:
 
       - uses: Chia-Network/actions/setup-python@main
 
-      - name: check generated chia_rs.pyi
+      - name: Install dependencies
         run: |
-          python generate_chialisp_constants.py
-          git diff --exit-code
+          python -m pip install uv
+          uv sync
+
+      - name: check generated
+          run: |
+            uv run generate_chialisp_constants.py
+            git diff --exit-code
 
       - name: pytest
           run: |
