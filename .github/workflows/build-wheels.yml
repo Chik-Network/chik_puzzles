@@ -148,12 +148,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Chia-Network/actions/setup-python@main
+      - name: Setup Python
+        uses: Chia-Network/actions/setup-python@main
 
-       - name: check generated
-          run: |
-            python generate_chialisp_constants.py
-            git diff --exit-code
+      - name: Check generated
+        run: |
+          python generate_chialisp_constants.py
+          git diff --exit-code
+
 
       # - name: pytest
       #     run: |
