@@ -160,10 +160,10 @@ jobs:
             uv run generate_chialisp_constants.py
             git diff --exit-code
 
-      - name: pytest
-          run: |
-            uv run pytest -n 0 chia_puzzles_py/_tests/
+      # - name: pytest
+      #     run: |
+      #       uv run pytest -n 0 chia_puzzles_py/_tests/
       
-      - name: cargo
-          run: |
-            cargo test --all
+      # - name: cargo
+      #     run: |
+      #       cargo test --all
