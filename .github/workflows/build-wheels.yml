@@ -150,14 +150,9 @@ jobs:
 
       - uses: Chia-Network/actions/setup-python@main
 
-      - name: Install dependencies
-        run: |
-          python -m pip install uv
-          uv sync
-
-      - name: check generated
+       - name: check generated
           run: |
-            uv run generate_chialisp_constants.py
+            python generate_chialisp_constants.py
             git diff --exit-code
 
       # - name: pytest
