@@ -157,10 +157,19 @@ jobs:
           git diff --exit-code
 
 
-      # - name: pytest
-      #     run: |
-      #       uv run pytest -n 0 chia_puzzles_py/_tests/
-      
-      # - name: cargo
-      #     run: |
-      #       cargo test --all
+   cargo-tests:
+    name: Run Cargo Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run Cargo Tests
+        run: |
+          cargo test --all
