@@ -96,10 +96,6 @@ jobs:
           - name: Intel
             matrix: intel
         exclude:
-          # Only partial entries are required here by GitHub Actions so generally I
-          # only specify the `matrix:` entry.  The super linter complains so for now
-          # all entries are included to avoid that.  Reported at
-          # https://github.com/github/super-linter/issues/3016
           - os:
               name: Windows
               matrix: windows
@@ -156,8 +152,7 @@ jobs:
           python generate_chialisp_constants.py
           git diff --exit-code
 
-
-   cargo-tests:
+  cargo-tests:
     name: Run Cargo Tests
     runs-on: ubuntu-latest
 
@@ -175,26 +170,26 @@ jobs:
           cargo test --all
   
   python-tests:
-  name: Run Python Tests
-  runs-on: ubuntu-latest
+    name: Run Python Tests
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Python
-      uses: Chia-Network/actions/setup-python@main
+      - name: Setup Python
+        uses: Chia-Network/actions/setup-python@main
 
-    - name: Install Dependencies
-      run: |
-        pip install uv pytest
+      - name: Install Dependencies
+        run: |
+          pip install uv pytest
 
-    - name: uv sync
-      run: |
-        uv sync
+      - name: uv sync
+        run: |
+          uv sync
 
-    - name: Run Specific Python Test
-      run: |
-        uv run pytest ./chia_puzzles_py/tests/test_import.py
+      - name: Run Specific Python Test
+        run: |
+          uv run pytest ./chia_puzzles_py/tests/test_import.py
