@@ -2,16 +2,18 @@ version = 1
 requires-python = ">=3.11"
 
 [[package]]
-name = "chia-puzzles"
+name = "chia-puzzles-py"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
+    { name = "clvm" },
     { name = "clvm-tools" },
     { name = "pytest" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "clvm", specifier = ">=0.9.11" },
     { name = "clvm-tools", specifier = ">=0.4.10" },
     { name = "pytest", specifier = ">=8.3.3" },
 ]
