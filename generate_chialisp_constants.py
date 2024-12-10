@@ -77,6 +77,8 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
     python_file.write("# Auto-generated Python file with loaded Chialisp constants\n\n")
     rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n\n")
     here = Path(__file__).parent.resolve()
+    # Create the temp directory referenced below if it doesn't exist
+    os.makedirs("puzzles/temp", exist_ok=True)
     temp_file = here.joinpath("puzzles/temp/tempfile.clsp.hex")
     try:
         for name, file_path, hash in chialisp_dictionary:
@@ -86,11 +88,18 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
 
             bytes_data = bytes.fromhex(hex_data)
 
+            try:
+                os.unlink(temp_file)
+            except FileNotFoundError:
+                # Fine if the file doesn't exist
+                pass
+
             source_code_path = here.joinpath(file_path[2:-4])
+            source_code_dir = here.joinpath(file_path).parent
             compile_clvm(
                 input_path=os.fspath(source_code_path),
                 output_path=os.fspath(temp_file),
-                search_paths=[os.fspath(here.joinpath("puzzles"))],
+                search_paths=[os.fspath(here.joinpath("puzzles")), os.fspath(source_code_dir)],
             )
             with open(temp_file, "r") as hex_file:
                 temp_hex_data = hex_file.read().strip().replace("\n", "").replace("\r", "")
