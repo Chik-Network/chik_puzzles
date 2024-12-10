@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-
+from clvm_tools_rs import compile_clvm
 from chia_puzzles_py.manage_clvm import generate_hash_bytes
 
 chialisp_dictionary = [
@@ -76,7 +76,8 @@ os.makedirs(python_dest_path.parent, exist_ok=True)
 with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
     python_file.write("# Auto-generated Python file with loaded Chialisp constants\n\n")
     rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n\n")
-
+    here = Path(__file__).parent.resolve()
+    temp_file = here.joinpath("puzzles/temp/tempfile.clsp.hex")
     try:
         for name, file_path, hash in chialisp_dictionary:
         
@@ -85,6 +86,19 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
 
             bytes_data = bytes.fromhex(hex_data)
 
+            source_code_path = here.joinpath(file_path[2:-4])
+            compile_clvm(
+                input_path=os.fspath(source_code_path),
+                output_path=os.fspath(temp_file),
+                search_paths=[os.fspath(here.joinpath("puzzles"))],
+            )
+            with open(temp_file, "r") as hex_file:
+                temp_hex_data = hex_file.read().strip().replace("\n", "").replace("\r", "")
+
+            if temp_hex_data != hex_data:
+                raise ValueError(f"Compilation of {name} different then checked in hex file")
+
+            # Check if the actual treehash of the Program matches the recorded hash
             if generate_hash_bytes(bytes_data).hex() != hash:
                 raise ValueError(f"Hash mismatch found in: {name}")
 
@@ -99,6 +113,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             )
 
             print(f"Processed {name} from {file_path}")
+        
         print(f"Rust and Python files generated successfully:\n- {rust_dest_path}\n- {python_dest_path}")
     except FileNotFoundError:
         print(f"File not found: {file_path}")
