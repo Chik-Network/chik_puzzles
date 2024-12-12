@@ -3,6 +3,9 @@ from pathlib import Path
 from clvm_tools_rs import compile_clvm
 from chia_puzzles_py.manage_clvm import generate_hash_bytes
 
+# This is the master list of puzzles to be exported.
+# When a new puzzle is added, it should be added to this list.
+# The format is (name, path, treehash)
 chialisp_dictionary = [
     # CAT Puzzles
     (
