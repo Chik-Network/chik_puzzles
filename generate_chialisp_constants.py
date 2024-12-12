@@ -1,3 +1,5 @@
+# This is the file that should be run to generate the Rust and Python files with the loaded Chialisp constants.
+
 import os
 from pathlib import Path
 from clvm_tools_rs import compile_clvm
@@ -314,6 +316,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 # Fine if the file doesn't exist
                 pass
 
+            # Check if the source code matches the committed compiled hex
             source_code_path = here.joinpath(file_path[2:-4])
             source_code_dir = here.joinpath(file_path).parent
             compile_clvm(
