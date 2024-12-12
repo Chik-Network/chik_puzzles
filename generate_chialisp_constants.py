@@ -342,7 +342,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 f"pub const {name}: [u8; {len(bytes_data)}] = hex!(\"{hex_data}\");\n"
             )
 
-            python_file.write(f'{name} = "bytes.fromhex({hex_data})"\n')
+            python_file.write(f'{name} = bytes.fromhex("{hex_data}")\n')
 
             print(f"Processed {name} from {file_path}")
 
