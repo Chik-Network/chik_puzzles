@@ -9,6 +9,13 @@ All puzzles are kept in the `puzzles` folder as both a `.clsp` and `.clsp.hex` f
 
 The Python and Rust bindings are created by running `generate_chialisp_constants.py`
 
+## Adding Bindings for a New Puzzle
+
+1. Add the `.clsp` and `.clsp.hex` files into the `programs` folder.
+2. Add the puzzle name, path, and shatree hash into the list in `generate_chialisp_constants.py`.
+3. Run `generate_chialisp_constants.py`.
+4. Commit your changes, including to the outputted `programs.py` and `loaded_chialisp.rs`.
+
 # Testing
 
 This project is managed with `uv` for Python and `cargo` for Rust.
