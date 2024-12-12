@@ -181,8 +181,8 @@ chialisp_dictionary = [
         "c4d24c3c5349376f3e8f3aba202972091713b4ec4915f0f26192ae4ace0bd04d",
     ),
     (
-        "STANDARD_VC_BACKDOOR_PUZZLE",
-        "./puzzles/vc_puzzles/standard_vc_backdoor_puzzle.clsp.hex",
+        "STANDARD_VC_REVOCATION_PUZZLE",
+        "./puzzles/vc_puzzles/standard_vc_revocation_puzzle.clsp.hex",
         "fbce76408ebaf9b3d0b8cd90cc68607755eeca67cd7432d5eea85f3f498cc002",
     ),
     (

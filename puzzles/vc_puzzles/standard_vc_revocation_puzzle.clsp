@@ -1,4 +1,4 @@
-; This is the standard puzzle that a VerifiedCredential provider will put into the backdoor slot of revocation_layer.clsp
+; This is the standard puzzle that a VerifiedCredential provider will put into the revocation layer slot of revocation_layer.clsp
 
 ; The goal of this puzzle is to recreate the VC exactly as it is except for three things:
 ; 1) There is no longer a revocation layer
