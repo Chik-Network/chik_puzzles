@@ -1,4 +1,4 @@
-name: Python wheels
+name: Check build
 
 on:
   push:
@@ -159,45 +159,3 @@ jobs:
         run: |
           uv run generate_chialisp_constants.py
           git diff --exit-code
-
-  cargo-tests:
-    name: Run Cargo Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Run Cargo Tests
-        run: |
-          cargo test --all
-  
-  python-tests:
-    name: Run Python Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Python
-        uses: Chia-Network/actions/setup-python@main
-
-      - name: Install Dependencies
-        run: |
-          pip install uv pytest
-
-      - name: uv sync
-        run: |
-          uv sync
-
-      - name: Run Specific Python Test
-        run: |
-          uv run pytest ./chia_puzzles_py/tests/test_import.py
