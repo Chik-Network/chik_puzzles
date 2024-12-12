@@ -286,8 +286,14 @@ os.makedirs(rust_dest_path.parent, exist_ok=True)
 os.makedirs(python_dest_path.parent, exist_ok=True)
 
 with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
-    python_file.write("# Auto-generated Python file with loaded Chialisp constants\n\n")
-    rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n\n")
+    python_file.write("# Auto-generated Python file with loaded Chialisp constants\n")
+    rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n")
+    
+    python_file.write("# This file was created from running generate_chialisp_constants.py\n\n")
+    rust_file.write("// This file was created from running generate_chialisp_constants.py\n\n")
+
+    rust_file.write("use hex_literal::hex;")
+    
     here = Path(__file__).parent.resolve()
     # Create the temp directory referenced below if it doesn't exist
     os.makedirs("puzzles/temp", exist_ok=True)
@@ -326,13 +332,11 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             if generate_hash_bytes(bytes_data).hex() != hash:
                 raise ValueError(f"Hash mismatch found in: {name}")
 
-            rust_byte_array_string = ", ".join(f"0x{byte:02x}" for byte in bytes_data)
             rust_file.write(
-                f"pub const {name}: [u8; {len(bytes_data)}] = [{rust_byte_array_string}];\n"
+                f"pub const {name}: [u8; {len(bytes_data)}] = hex!(\"{hex_data}\");\n"
             )
 
-            python_bytes_literal = "".join(f"\\x{byte:02x}" for byte in bytes_data)
-            python_file.write(f'{name} = b"{python_bytes_literal}"\n')
+            python_file.write(f'{name} = "bytes.fromhex({hex_data})"\n')
 
             print(f"Processed {name} from {file_path}")
 
