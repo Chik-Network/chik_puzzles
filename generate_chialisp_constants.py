@@ -186,8 +186,8 @@ chialisp_dictionary = [
         "8c3f1dc2e46c0d7ec4c2cbd007e23c0368ff8f80c5bc0101647a5c27626ebce6",
     ),
     (
-        "VIRAL_BACKDOOR",
-        "./puzzles/vc_puzzles/viral_backdoor.clsp.hex",
+        "REVOCATION_LAYER",
+        "./puzzles/vc_puzzles/revocation_layer.clsp.hex",
         "00848115554ea674131f89f311707a959ad3f4647482648f3fe91ba289131f51",
     ),
     # Misc Puzzles
