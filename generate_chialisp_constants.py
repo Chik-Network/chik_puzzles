@@ -345,20 +345,17 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             if generate_hash_bytes(bytes_data).hex() != hash:
                 raise ValueError(f"Hash mismatch found in: {name}")
 
-            rust_file.write(
-                f'pub const {name}: [u8; {len(bytes_data)}] ='
-            )
-            if len(hex_data) < 82 and len(hex_data) > 66:
-                rust_file.write('\n')
+            rust_file.write(f"pub const {name}: [u8; {len(bytes_data)}] =")
+            if len(hex_data) < 85 and len(hex_data) > 66:
+                rust_file.write("\n")
                 rust_file.write(f'    hex!("{hex_data}");\n')
             elif len(hex_data) < 100 and len(hex_data) > 66:
-                rust_file.write(' hex!(\n')
+                rust_file.write(" hex!(\n")
                 rust_file.write(f'    "{hex_data}"\n')
                 rust_file.write(");\n")
             else:
-                 rust_file.write(f' hex!("{hex_data}");\n')
-            
-            
+                rust_file.write(f' hex!("{hex_data}");\n')
+
             # Write the Python file with line length appropriate formatting
             if len(hex_data) > 66:
                 python_file.write(f"{name} = bytes.fromhex(\n")
