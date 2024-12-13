@@ -134,6 +134,28 @@ jobs:
         run: |
           cargo build
 
+  check-ruff-formatting:
+    name: Check python formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: Chia-Network/actions/setup-python@main
+
+      - name: Install Dependencies
+        run: |
+          pip install ruff
+
+      - name: Check generated
+        run: |
+          ruff format --check --diff .
+          git diff --exit-code
+
   check-puzzles:
     name: Check generated puzzles
     runs-on: ubuntu-latest
