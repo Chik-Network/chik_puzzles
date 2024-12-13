@@ -181,3 +181,32 @@ jobs:
         run: |
           uv run generate_chialisp_constants.py
           git diff --exit-code
+
+  fmt:
+    runs-on: ubuntu-latest
+    name: cargo fmt
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: fmt
+        run: |
+          cargo fmt --all -- --files-with-diff --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: workspace
+        run: |
+          cargo clippy --workspace --all-features --all-targets
