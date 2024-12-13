@@ -293,12 +293,16 @@ os.makedirs(python_dest_path.parent, exist_ok=True)
 with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
     python_file.write("# Auto-generated Python file with loaded Chialisp constants\n")
     rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n")
-    
-    python_file.write("# This file was created from running generate_chialisp_constants.py\n\n")
-    rust_file.write("// This file was created from running generate_chialisp_constants.py\n\n")
+
+    python_file.write(
+        "# This file was created from running generate_chialisp_constants.py\n\n"
+    )
+    rust_file.write(
+        "// This file was created from running generate_chialisp_constants.py\n\n"
+    )
 
     rust_file.write("use hex_literal::hex;")
-    
+
     here = Path(__file__).parent.resolve()
     # Create the temp directory referenced below if it doesn't exist
     os.makedirs("puzzles/temp", exist_ok=True)
@@ -322,7 +326,10 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             compile_clvm(
                 input_path=os.fspath(source_code_path),
                 output_path=os.fspath(temp_file),
-                search_paths=[os.fspath(here.joinpath("puzzles")), os.fspath(source_code_dir)],
+                search_paths=[
+                    os.fspath(here.joinpath("puzzles")),
+                    os.fspath(source_code_dir),
+                ],
             )
             with open(temp_file, "r") as hex_file:
                 temp_hex_data = (
@@ -339,10 +346,12 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 raise ValueError(f"Hash mismatch found in: {name}")
 
             rust_file.write(
-                f"pub const {name}: [u8; {len(bytes_data)}] = hex!(\"{hex_data}\");\n"
+                f'pub const {name}: [u8; {len(bytes_data)}] = hex!("{hex_data}");\n'
             )
 
-            python_file.write(f'{name} = bytes.fromhex("{hex_data}")\n')
+            python_file.write(f'{name} = bytes.fromhex(\n')
+            python_file.write(f'    \"{hex_data}\"\n')
+            python_file.write(")\n")
 
             print(f"Processed {name} from {file_path}")
 
