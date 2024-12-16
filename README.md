@@ -18,17 +18,18 @@ The Python and Rust bindings are created by running `generate_chialisp_constants
 
 # Testing
 
-This project is managed with `uv` for Python and `cargo` for Rust.
+This project is managed with `poetry` for Python and `cargo` for Rust.
 
 To run the Python tests:
 ```
-pip install uv
-uv venv
+python -m venv venv
+
+pip install poetry
 . ./venv/bin/activate
-uv sync
-uv run pytest chia_puzzles_py/tests
+poetry install
+pytest chia_puzzles_py/tests
 ```
-If you're on Windows activate the venv with `.venv\Scripts\activate` instead
+If you're on Windows activate the venv with `. venv\Scripts\activate` instead
 
 To run the Rust tests:
 ```

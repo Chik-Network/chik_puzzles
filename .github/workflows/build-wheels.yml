@@ -127,8 +127,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install uv
-          uv sync
+          python -m pip install poetry
+          poetry install
       
       - name: cargo build
         run: |
@@ -171,15 +171,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install uv
+          pip install poetry
 
-      - name: uv sync
+      - name: poetry install
         run: |
-          uv sync
+          poetry install
 
       - name: Check generated
         run: |
-          uv run generate_chialisp_constants.py
+          generate_chialisp_constants.py
           git diff --exit-code
 
   fmt:

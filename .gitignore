@@ -3,3 +3,6 @@
 __pycache__/
 *.pyc
 uv.lock
+venv
+.venv
+tempfile.clsp.hex

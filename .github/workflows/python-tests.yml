@@ -34,12 +34,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install uv pytest
+          pip install poetry
 
-      - name: uv sync
+      - name: poetry install
         run: |
-          uv sync
+          poetry install
 
       - name: Run Specific Python Test
         run: |
-          uv run pytest ./chia_puzzles_py/tests/test_import.py
+          pytest ./chia_puzzles_py/tests/test_import.py
