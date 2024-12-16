@@ -32,18 +32,15 @@ jobs:
       - name: Setup Python
         uses: Chia-Network/actions/setup-python@main
 
-      - name: Install Dependencies
+      - name: Install Poetry
         run: |
-          python -m venv venv
-          . ./venv/bin/activate
+          python -m pip install --upgrade pip
           pip install poetry
 
-      - name: poetry install
+      - name: Install Dependencies with Poetry
         run: |
-          . ./venv/bin/activate
           poetry install
 
-      - name: Run Specific Python Test
+      - name: Run Tests with Pytest
         run: |
-          . ./venv/bin/activate
-          pytest ./chia_puzzles_py/tests/test_import.py
+          poetry run pytest ./chia_puzzles_py/tests/test_import.py
