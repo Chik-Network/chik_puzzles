@@ -171,8 +171,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m venv venv
-          . ./venv/bin/activate
+          python -m pip install --upgrade pip
           pip install poetry
 
       - name: poetry install
@@ -181,7 +180,7 @@ jobs:
 
       - name: Check generated
         run: |
-          generate_chialisp_constants.py
+          poetry run generate_chialisp_constants.py
           git diff --exit-code
 
   fmt:
