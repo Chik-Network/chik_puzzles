@@ -171,6 +171,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m venv venv
+          . ./venv/bin/activate
           pip install poetry
 
       - name: poetry install
