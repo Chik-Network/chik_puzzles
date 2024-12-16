@@ -40,8 +40,10 @@ jobs:
 
       - name: poetry install
         run: |
+          . ./venv/bin/activate
           poetry install
 
       - name: Run Specific Python Test
         run: |
+          . ./venv/bin/activate
           pytest ./chia_puzzles_py/tests/test_import.py
