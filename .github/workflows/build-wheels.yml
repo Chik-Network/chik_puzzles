@@ -180,7 +180,7 @@ jobs:
 
       - name: Check generated
         run: |
-          poetry run generate_chialisp_constants.py
+          python ./generate_chialisp_constants.py
           git diff --exit-code
 
   fmt:
