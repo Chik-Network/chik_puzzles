@@ -1,7 +1,12 @@
 [package]
 name = "chia_puzzles"
-version = "0.18.0"
+version = "0.18.1"
 edition = "2021"
+license = "Apache-2.0"
+description = "Chia primitives needed for building wallets."
+authors = ["Matt Howard <matt@chia.net>"]
+homepage = "https://github.com/Chia-Network/chia_puzzles"
+repository = "https://github.com/Chia-Network/chia_puzzles"
 
 [dependencies]
 hex = "0.4"
