@@ -360,6 +360,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 )
             )
             rust_file.write("\n/// ```\n")
+
             rust_file.write(
                 f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!("{hex_data}");\n'
             )
@@ -369,12 +370,17 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             )
 
             # Write the Python file with line length appropriate formatting
-            if len(name) + len(hex_data) > 79:
-                python_file.write(f"{name} = bytes.fromhex(\n")
-                python_file.write(f'    "{hex_data}"\n')
-                python_file.write(")\n")
+            inline_python_hex = f'{name} = bytes.fromhex("{hex_data}")'
+            if len(inline_python_hex) > 79:
+                python_file.write(f'{name} = bytes.fromhex(\n    "{hex_data}"\n)\n')
             else:
-                python_file.write(f'{name} = bytes.fromhex("{hex_data}")\n')
+                python_file.write(inline_python_hex + "\n")
+
+            inline_python_hash = f'{name}_HASH = bytes.fromhex("{hash}")'
+            if len(inline_python_hash) > 79:
+                python_file.write(f'{name}_HASH = bytes.fromhex(\n    "{hash}"\n)\n')
+            else:
+                python_file.write(inline_python_hash + "\n")
 
             print(f"Processed {name} from {file_path}")
 
