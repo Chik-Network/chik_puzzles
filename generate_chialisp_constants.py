@@ -284,7 +284,7 @@ chialisp_dictionary = [
     ),
 ]
 
-rust_dest_path = Path("./src/loaded_chialisp.rs")
+rust_dest_path = Path("./src/programs.rs")
 python_dest_path = Path("./chia_puzzles_py/programs.py")
 
 os.makedirs(rust_dest_path.parent, exist_ok=True)

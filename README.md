@@ -14,13 +14,14 @@ The Python and Rust bindings are created by running `generate_chialisp_constants
 1. Add the `.clsp` and `.clsp.hex` files into the `programs` folder.
 2. Add the puzzle name, path, and shatree hash into the list in `generate_chialisp_constants.py`.
 3. Run `generate_chialisp_constants.py`.
-4. Commit your changes, including to the outputted `programs.py` and `loaded_chialisp.rs`.
+4. Commit your changes, including to the outputted `programs.py` and `programs.rs`.
 
 # Testing
 
 This project is managed with `poetry` for Python and `cargo` for Rust.
 
 To run the Python tests:
+
 ```
 python -m venv venv
 
@@ -29,9 +30,11 @@ pip install poetry
 poetry install
 pytest chia_puzzles_py/tests
 ```
+
 If you're on Windows activate the venv with `. venv\Scripts\activate` instead
 
 To run the Rust tests:
+
 ```
 cargo test --all
 ```
