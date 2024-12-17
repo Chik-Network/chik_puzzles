@@ -54,6 +54,9 @@ jobs:
       - name: Setup Python
         uses: Chia-Network/actions/setup-python@main
 
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -66,6 +69,7 @@ jobs:
       - name: Check generated
         run: |
           poetry run python ./generate_chialisp_constants.py
+          cargo fmt
           git diff --exit-code
 
   fmt:
