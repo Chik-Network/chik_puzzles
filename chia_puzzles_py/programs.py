@@ -145,9 +145,7 @@ NFT_STATE_LAYER = bytes.fromhex(
 NFT_STATE_LAYER_HASH = bytes.fromhex(
     "a04d9f57764f54a43e4030befb4d80026e870519aaa66334aef8304f5d0393c2"
 )
-CONDITIONS_W_FEE_ANNOUNCE = bytes.fromhex(
-    "ff04ffff04ffff013cffff04ff05ff808080ff0280"
-)
+CONDITIONS_W_FEE_ANNOUNCE = bytes.fromhex("ff04ffff04ffff013cffff04ff05ff808080ff0280")
 CONDITIONS_W_FEE_ANNOUNCE_HASH = bytes.fromhex(
     "1a169582dc619f2542f8eb79f02823e1595ba0aca53820f503eda5ff20b47856"
 )
