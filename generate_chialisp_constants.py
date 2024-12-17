@@ -365,15 +365,26 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!("{hex_data}");'
             )
             if len(inline_rust_hex) > 100 and len(hex_data) <= 94:
-                rust_file.write(
-                    f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!(\n    "{hex_data}"\n);\n'
-                )
+                if len(hex_data) + 13 > 100:
+                    rust_file.write(
+                        f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!(\n    "{hex_data}"\n);\n'
+                    )
+                else:
+                    rust_file.write(
+                        f'pub const {name}: [u8; {len(hex_data) // 2}] =\n    hex!("{hex_data}");\n'
+                    )
             else:
                 rust_file.write(inline_rust_hex + "\n")
 
-            rust_file.write(
-                f'pub const {name}_HASH: [u8; {len(hash) // 2}] = hex!("{hash}");\n'
+            inline_rust_hash = (
+                f'pub const {name}_HASH: [u8; {len(hash) // 2}] = hex!("{hash}");'
             )
+            if len(inline_rust_hash) > 100 and len(hash) <= 94:
+                rust_file.write(
+                    f'pub const {name}_HASH: [u8; {len(hash) // 2}] =\n    hex!("{hash}");\n'
+                )
+            else:
+                rust_file.write(inline_rust_hash + "\n")
 
             # Write the Python file with line length appropriate formatting
             inline_python_hex = f'{name} = bytes.fromhex("{hex_data}")'
