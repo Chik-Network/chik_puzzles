@@ -97,6 +97,12 @@ chialisp_dictionary = [
         "./puzzles/did_puzzles/did_innerpuz.clsp.hex",
         "33143d2bef64f14036742673afd158126b94284b4530a28c354fac202b0c910e",
     ),
+    # DL Puzzles
+    (
+        "GRAFTROOT_DL_OFFERS",
+        "./puzzles/dl_puzzles/graftroot_dl_offers.clsp.hex",
+        "0893e36a88c064fddfa6f8abdb42c044584a98cb4273b80cccc83b4867b701a1",
+    ),
     # NFT Puzzles
     (
         "CREATE_NFT_LAUNCHER_FROM_DID",

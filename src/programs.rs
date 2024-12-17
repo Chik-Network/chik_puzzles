@@ -2090,6 +2090,112 @@ pub const DID_INNERPUZ_HASH: [u8; 32] =
     hex!("33143d2bef64f14036742673afd158126b94284b4530a28c354fac202b0c910e");
 
 /// ```text
+/// (mod
+///   (
+///     INNER_PUZZLE
+///     SINGLETON_STRUCTS
+///     METADATA_LAYER_HASHES
+///     VALUES_TO_PROVE  ; this is a list of BRANCHES in the merkle tree to prove (so as to prove a whole subtree)
+///     proofs_of_inclusion
+///     new_metadatas  ; (root . etc)
+///     new_metadata_updaters
+///     new_inner_puzs
+///     inner_solution
+///   )
+///
+///   (include condition_codes.clib)
+///   (include merkle_utils.clib)
+///   (include curry-and-treehash.clib)
+///
+///   (defmacro assert items
+///     (if (r items)
+///         (list if (f items) (c assert (r items)) (q . (x)))
+///         (f items)
+///     )
+///   )
+///
+///   (defun-inline construct_singleton (SINGLETON_STRUCT METADATA_LAYER_HASH new_metadata new_metadata_updater new_inner_puz)
+///     (puzzle-hash-of-curried-function (f SINGLETON_STRUCT)
+///       (puzzle-hash-of-curried-function METADATA_LAYER_HASH
+///         new_inner_puz
+///         (sha256tree new_metadata_updater)
+///         (sha256tree new_metadata)
+///         (sha256tree METADATA_LAYER_HASH)
+///       )
+///       (sha256tree SINGLETON_STRUCT)
+///     )
+///   )
+///
+///   (defun verify_proofs (new_root VALUES_TO_PROVE proofs_of_inclusion)
+///     (if proofs_of_inclusion
+///         (assert (= new_root (simplify_merkle_proof_after_leaf (f VALUES_TO_PROVE) (f proofs_of_inclusion)))
+///           ; then
+///           (verify_proofs new_root (r VALUES_TO_PROVE) (r proofs_of_inclusion))
+///         )
+///         1
+///     )
+///   )
+///
+///   (defun loop_over_curried_params
+///     (
+///       SINGLETON_STRUCTS
+///       METADATA_LAYER_HASHES
+///       VALUES_TO_PROVE
+///       proofs_of_inclusion
+///       new_metadatas
+///       new_metadata_updaters
+///       new_inner_puzs
+///       conditions
+///     )
+///
+///     (if SINGLETON_STRUCTS
+///         (assert (verify_proofs (f (f new_metadatas)) (f VALUES_TO_PROVE) (f proofs_of_inclusion))
+///           ; then
+///           (loop_over_curried_params
+///             (r SINGLETON_STRUCTS)
+///             (r METADATA_LAYER_HASHES)
+///             (r VALUES_TO_PROVE)
+///             (r proofs_of_inclusion)
+///             (r new_metadatas)
+///             (r new_metadata_updaters)
+///             (r new_inner_puzs)
+///             (c
+///               (list
+///                 ASSERT_PUZZLE_ANNOUNCEMENT
+///                 (sha256
+///                   (construct_singleton (f SINGLETON_STRUCTS) (f METADATA_LAYER_HASHES) (f new_metadatas) (f new_metadata_updaters) (f new_inner_puzs))
+///                   '$'
+///                 )
+///               )
+///               conditions
+///             )
+///           )
+///         )
+///         conditions
+///     )
+///   )
+///
+///   (if proofs_of_inclusion
+///       (loop_over_curried_params
+///         SINGLETON_STRUCTS
+///         METADATA_LAYER_HASHES
+///         VALUES_TO_PROVE
+///         proofs_of_inclusion
+///         new_metadatas
+///         new_metadata_updaters
+///         new_inner_puzs
+///         (a INNER_PUZZLE inner_solution)
+///       )
+///       ; You may want to run the puzzle without a raise to examine conditions so we'll make a "blessed" way to fail
+///       (c (list ASSERT_MY_AMOUNT -1) (a INNER_PUZZLE inner_solution))
+///   )
+/// )
+/// ```
+pub const GRAFTROOT_DL_OFFERS: [u8; 922] = hex!("ff02ffff01ff02ffff03ff5fffff01ff02ff3affff04ff02ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff81bfffff04ff82017fffff04ff8202ffffff04ffff02ff05ff8205ff80ff8080808080808080808080ffff01ff04ffff04ff10ffff01ff81ff8080ffff02ff05ff8205ff808080ff0180ffff04ffff01ffffff49ff3f02ff04ff0101ffff02ffff02ffff03ff05ffff01ff02ff2affff04ff02ffff04ff0dffff04ffff0bff12ffff0bff2cff1480ffff0bff12ffff0bff12ffff0bff2cff3c80ff0980ffff0bff12ff0bffff0bff2cff8080808080ff8080808080ffff010b80ff0180ff02ffff03ff05ffff01ff02ffff03ffff02ff3effff04ff02ffff04ff82011fffff04ff27ffff04ff4fff808080808080ffff01ff02ff3affff04ff02ffff04ff0dffff04ff1bffff04ff37ffff04ff6fffff04ff81dfffff04ff8201bfffff04ff82037fffff04ffff04ffff04ff28ffff04ffff0bffff02ff26ffff04ff02ffff04ff11ffff04ffff02ff26ffff04ff02ffff04ff13ffff04ff82027fffff04ffff02ff36ffff04ff02ffff04ff82013fff80808080ffff04ffff02ff36ffff04ff02ffff04ff819fff80808080ffff04ffff02ff36ffff04ff02ffff04ff13ff80808080ff8080808080808080ffff04ffff02ff36ffff04ff02ffff04ff09ff80808080ff808080808080ffff012480ff808080ff8202ff80ff8080808080808080808080ffff01ff088080ff0180ffff018202ff80ff0180ffffff0bff12ffff0bff2cff3880ffff0bff12ffff0bff12ffff0bff2cff3c80ff0580ffff0bff12ffff02ff2affff04ff02ffff04ff07ffff04ffff0bff2cff2c80ff8080808080ffff0bff2cff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff36ffff04ff02ffff04ff09ff80808080ffff02ff36ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ffff02ffff03ff1bffff01ff02ff2effff04ff02ffff04ffff02ffff03ffff18ffff0101ff1380ffff01ff0bffff0102ff2bff0580ffff01ff0bffff0102ff05ff2b8080ff0180ffff04ffff04ffff17ff13ffff0181ff80ff3b80ff8080808080ffff010580ff0180ff02ffff03ff17ffff01ff02ffff03ffff09ff05ffff02ff2effff04ff02ffff04ff13ffff04ff27ff808080808080ffff01ff02ff3effff04ff02ffff04ff05ffff04ff1bffff04ff37ff808080808080ffff01ff088080ff0180ffff01ff010180ff0180ff018080");
+pub const GRAFTROOT_DL_OFFERS_HASH: [u8; 32] =
+    hex!("0893e36a88c064fddfa6f8abdb42c044584a98cb4273b80cccc83b4867b701a1");
+
+/// ```text
 /// (mod (LAUNCHER_PH MINT_NUMBER MINT_TOTAL)
 ///   (include condition_codes.clib)
 ///   (list
