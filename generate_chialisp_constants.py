@@ -335,6 +335,8 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 temp_hex_data = (
                     hex_file.read().strip().replace("\n", "").replace("\r", "")
                 )
+            with open(source_code_path, "r") as source_file:
+                source = source_file.read().strip()
 
             if temp_hex_data != hex_data:
                 raise ValueError(
@@ -342,19 +344,24 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 )
 
             # Check if the actual treehash of the Program matches the recorded hash
-            if generate_hash_bytes(bytes_data).hex() != hash:
+            hash_bytes = generate_hash_bytes(bytes_data)
+            if hash_bytes.hex() != hash:
                 raise ValueError(f"Hash mismatch found in: {name}")
 
-            rust_file.write(f"pub const {name}: [u8; {len(bytes_data)}] =")
-            if len(hex_data) < 85 and len(hex_data) > 66:
-                rust_file.write("\n")
-                rust_file.write(f'    hex!("{hex_data}");\n')
-            elif len(hex_data) < 100 and len(hex_data) > 66:
-                rust_file.write(" hex!(\n")
-                rust_file.write(f'    "{hex_data}"\n')
-                rust_file.write(");\n")
-            else:
-                rust_file.write(f' hex!("{hex_data}");\n')
+            rust_file.write("\n")
+
+            rust_file.write("/// ```text\n")
+            rust_file.write(
+                "\n".join(map(lambda line: f"/// {line}", source.splitlines()))
+            )
+            rust_file.write("\n/// ```\n")
+            rust_file.write(
+                f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!("{hex_data}");\n'
+            )
+
+            rust_file.write(
+                f'pub const {name}_HASH: [u8; {len(hash) // 2}] = hex!("{hash}");\n'
+            )
 
             # Write the Python file with line length appropriate formatting
             if len(hex_data) > 66:
