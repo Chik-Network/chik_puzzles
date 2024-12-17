@@ -352,7 +352,12 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
 
             rust_file.write("/// ```text\n")
             rust_file.write(
-                "\n".join(map(lambda line: f"/// {line}", source.splitlines()))
+                "\n".join(
+                    map(
+                        lambda line: f"/// {line}" if len(line) > 0 else "///",
+                        source.splitlines(),
+                    )
+                )
             )
             rust_file.write("\n/// ```\n")
             rust_file.write(
@@ -364,7 +369,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             )
 
             # Write the Python file with line length appropriate formatting
-            if len(hex_data) > 66:
+            if len(name) + len(hex_data) > 79:
                 python_file.write(f"{name} = bytes.fromhex(\n")
                 python_file.write(f'    "{hex_data}"\n')
                 python_file.write(")\n")
