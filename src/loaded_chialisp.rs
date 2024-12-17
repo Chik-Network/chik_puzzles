@@ -80,7 +80,7 @@ use hex_literal::hex;
 /// ;   By induction, we see that S_{m+1} = sum(i, 1, m) [O_i - A_i] = sum(i, 1, m) O_i - sum(i, 1, m) A_i
 /// ;   So S_{n+1} = sum(i, 1, n) O_i - sum(i, 1, n) A_i. But S_{n+1} is actually S_1 = 0,
 /// ;   so thus sum(i, 1, n) O_i = sum (i, 1, n) A_i, ie. output total equals input total.
-/// 
+///
 /// ;; GLOSSARY:
 /// ;;  MOD_HASH: this code's sha256 tree hash
 /// ;;  TAIL_PROGRAM_HASH: the program that determines if a coin can mint new cats, burn cats, and check if its lineage is valid if its parent is not a CAT
@@ -96,7 +96,7 @@ use hex_literal::hex;
 /// ;;  prev_subtotal: the subtotal between prev-coin and this-coin
 /// ;;  extra_delta: an amount that is added to our delta and checked by the TAIL program
 /// ;;
-/// 
+///
 /// (mod (
 ///     MOD_HASH  ;; curried into puzzle
 ///     TAIL_PROGRAM_HASH  ;; curried into puzzle
@@ -109,17 +109,17 @@ use hex_literal::hex;
 ///     prev_subtotal  ;; included in announcement, prev_coin ASSERT_COIN_ANNOUNCEMENT will fail if wrong
 ///     extra_delta  ;; this is the "legal discrepancy" between your real delta and what you're announcing your delta is
 ///   )
-/// 
+///
 ///   ;;;;; start library code
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include cat_truths.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defconstant RING_MORPH_BYTE 0xcb)
-/// 
-/// 
+///
+///
 ///   ; take two lists and merge them into one
 ///   (defun merge_list (list_a list_b)
 ///     (if list_a
@@ -127,15 +127,15 @@ use hex_literal::hex;
 ///         list_b
 ///     )
 ///   )
-/// 
+///
 ///   ; cat_mod_struct = (MOD_HASH MOD_HASH_hash GENESIS_COIN_CHECKER GENESIS_COIN_CHECKER_hash)
-/// 
+///
 ///   (defun-inline mod_hash_from_cat_mod_struct (cat_mod_struct) (f cat_mod_struct))
 ///   (defun-inline mod_hash_hash_from_cat_mod_struct (cat_mod_struct) (f (r cat_mod_struct)))
 ///   (defun-inline tail_program_hash_from_cat_mod_struct (cat_mod_struct) (f (r (r cat_mod_struct))))
-/// 
+///
 ///   ;;;;; end library code
-/// 
+///
 ///   ;; return the puzzle hash for a cat with the given `GENESIS_COIN_CHECKER_hash` & `INNER_PUZZLE`
 ///   (defun-inline cat_puzzle_hash (cat_mod_struct inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (mod_hash_from_cat_mod_struct cat_mod_struct)
@@ -144,9 +144,9 @@ use hex_literal::hex;
 ///       (mod_hash_hash_from_cat_mod_struct cat_mod_struct)
 ///     )
 ///   )
-/// 
+///
 ///   ;; assert `CREATE_COIN_ANNOUNCEMENT` doesn't contain the RING_MORPH_BYTE bytes so it cannot be used to cheat the coin ring
-/// 
+///
 ///   (defun-inline morph_condition (condition cat_mod_struct)
 ///     (if (= (f condition) CREATE_COIN)
 ///         (c CREATE_COIN
@@ -165,23 +165,23 @@ use hex_literal::hex;
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   ;; given a coin's parent, inner_puzzle and amount, and the cat_mod_struct, calculate the id of the coin
 ///   (defun-inline coin_id_for_proof (coin cat_mod_struct)
 ///     (calculate_coin_id (f coin) (cat_puzzle_hash cat_mod_struct (f (r coin))) (f (r (r coin))))
 ///   )
-/// 
+///
 ///   ;; utility to fetch coin amount from coin
 ///   (defun-inline input_amount_for_coin (coin)
 ///     (f (r (r coin)))
 ///   )
-/// 
+///
 ///   ;; calculate the hash of an announcement
 ///   ;; we add 0xcb so ring announcements exist in a different namespace to announcements from inner_puzzles
 ///   (defun-inline calculate_annoucement_id (this_coin_id this_subtotal next_coin_id cat_mod_struct)
 ///     (sha256 next_coin_id RING_MORPH_BYTE (sha256tree (list this_coin_id this_subtotal)))
 ///   )
-/// 
+///
 ///   ;; create the `ASSERT_COIN_ANNOUNCEMENT` condition that ensures the next coin's announcement is correct
 ///   (defun-inline create_assert_next_announcement_condition (this_coin_id this_subtotal next_coin_id cat_mod_struct)
 ///     (list ASSERT_COIN_ANNOUNCEMENT
@@ -192,7 +192,7 @@ use hex_literal::hex;
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   ;; here we commit to I_{k-1} and S_k
 ///   ;; we add 0xcb so ring announcements exist in a different namespace to announcements from inner_puzzles
 ///   (defun-inline create_announcement_condition (prev_coin_id prev_subtotal)
@@ -200,20 +200,20 @@ use hex_literal::hex;
 ///       (concat RING_MORPH_BYTE (sha256tree (list prev_coin_id prev_subtotal)))
 ///     )
 ///   )
-/// 
+///
 ///   ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-/// 
+///
 ///   ;; this function takes a condition and returns an integer indicating
 ///   ;; the value of all output coins created with CREATE_COIN. If it's not
 ///   ;; a CREATE_COIN condition, it returns 0.
-/// 
+///
 ///   (defun-inline output_value_for_condition (condition)
 ///     (if (= (f condition) CREATE_COIN)
 ///         (f (r (r condition)))
 ///         0
 ///     )
 ///   )
-/// 
+///
 ///   ;; add two conditions to the list of morphed conditions:
 ///   ;; CREATE_COIN_ANNOUNCEMENT for my announcement
 ///   ;; ASSERT_COIN_ANNOUNCEMENT for the next coin's announcement
@@ -232,8 +232,8 @@ use hex_literal::hex;
 ///       morphed_conditions)
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   ;; This next section of code loops through all of the conditions to do three things:
 ///   ;;   1) Look for a "magic" value of -113 and, if one exists, filter it, and take note of the tail reveal and solution
 ///   ;;   2) Morph any CREATE_COIN or CREATE_COIN_ANNOUNCEMENT conditions
@@ -241,14 +241,14 @@ use hex_literal::hex;
 ///   ;;
 ///   ;; After everything return a struct in the format (morphed_conditions . (output_sum . tail_reveal_and_solution))
 ///   ;; If multiple magic conditions are specified, the later one will take precedence
-/// 
+///
 ///   (defun-inline condition_tail_reveal (condition) (f (r (r (r condition)))))
 ///   (defun-inline condition_tail_solution (condition) (f (r (r (r (r condition))))))
-/// 
+///
 ///   (defun cons_onto_first_and_add_to_second (morphed_condition output_value struct)
 ///     (c (c morphed_condition (f struct)) (c (+ output_value (f (r struct))) (r (r struct))))
 ///   )
-/// 
+///
 ///   (defun find_and_strip_tail_info (inner_conditions cat_mod_struct tail_reveal_and_solution)
 ///     (if inner_conditions
 ///         (if (= (output_value_for_condition (f inner_conditions)) -113)  ; Checks this is a CREATE_COIN of value -113
@@ -270,9 +270,9 @@ use hex_literal::hex;
 ///         (c () (c 0 tail_reveal_and_solution))
 ///     )
 ///   )
-/// 
+///
 ///   ;;;;;;;;;;;;;;;;;;;;;;;;;;; lineage checking
-/// 
+///
 ///   ;; return true iff parent of `this_coin_info` is provably a cat
 ///   ;; A 'lineage proof' consists of (parent_parent_id parent_INNER_puzzle_hash parent_amount)
 ///   ;; We use this information to construct a coin who's puzzle has been wrapped in this MOD and verify that,
@@ -289,7 +289,7 @@ use hex_literal::hex;
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun check_lineage_or_run_tail_program
 ///     (
 ///       this_coin_info
@@ -321,9 +321,9 @@ use hex_literal::hex;
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-/// 
+///
 ///   (defun stager_two (
 ///       Truths
 ///       (inner_conditions . (output_sum . tail_reveal_and_solution))
@@ -353,11 +353,11 @@ use hex_literal::hex;
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   ; CAT TRUTHS struct is: ; CAT Truths is: ((Inner puzzle hash . (MOD hash . (MOD hash hash . TAIL hash))) . (my_id . (my_parent_info my_puzhash my_amount)))
 ///   ; create truths - this_coin_info verified true because we calculated my ID from it!
 ///   ; lineage proof is verified later by cat parent check or tail_program
-/// 
+///
 ///   (defun stager (
 ///       cat_mod_struct
 ///       inner_conditions
@@ -386,7 +386,7 @@ use hex_literal::hex;
 ///         extra_delta
 ///     ))
 ///   )
-/// 
+///
 ///   (stager
 ///     ;; calculate cat_mod_struct, inner_puzzle_hash, coin_id
 ///     (list MOD_HASH (sha256 ONE MOD_HASH) TAIL_PROGRAM_HASH)
@@ -403,7 +403,8 @@ use hex_literal::hex;
 /// )
 /// ```
 pub const CAT_PUZZLE: [u8; 1672] = hex!("ff02ffff01ff02ff5effff04ff02ffff04ffff04ff05ffff04ffff0bff34ff0580ffff04ff0bff80808080ffff04ffff02ff17ff2f80ffff04ff5fffff04ffff02ff2effff04ff02ffff04ff17ff80808080ffff04ffff02ff2affff04ff02ffff04ff82027fffff04ff82057fffff04ff820b7fff808080808080ffff04ff81bfffff04ff82017fffff04ff8202ffffff04ff8205ffffff04ff820bffff80808080808080808080808080ffff04ffff01ffffffff3d46ff02ff333cffff0401ff01ff81cb02ffffff20ff02ffff03ff05ffff01ff02ff32ffff04ff02ffff04ff0dffff04ffff0bff7cffff0bff34ff2480ffff0bff7cffff0bff7cffff0bff34ff2c80ff0980ffff0bff7cff0bffff0bff34ff8080808080ff8080808080ffff010b80ff0180ffff02ffff03ffff22ffff09ffff0dff0580ff2280ffff09ffff0dff0b80ff2280ffff15ff17ffff0181ff8080ffff01ff0bff05ff0bff1780ffff01ff088080ff0180ffff02ffff03ff0bffff01ff02ffff03ffff09ffff02ff2effff04ff02ffff04ff13ff80808080ff820b9f80ffff01ff02ff56ffff04ff02ffff04ffff02ff13ffff04ff5fffff04ff17ffff04ff2fffff04ff81bfffff04ff82017fffff04ff1bff8080808080808080ffff04ff82017fff8080808080ffff01ff088080ff0180ffff01ff02ffff03ff17ffff01ff02ffff03ffff20ff81bf80ffff0182017fffff01ff088080ff0180ffff01ff088080ff018080ff0180ff04ffff04ff05ff2780ffff04ffff10ff0bff5780ff778080ffffff02ffff03ff05ffff01ff02ffff03ffff09ffff02ffff03ffff09ff11ff5880ffff0159ff8080ff0180ffff01818f80ffff01ff02ff26ffff04ff02ffff04ff0dffff04ff0bffff04ffff04ff81b9ff82017980ff808080808080ffff01ff02ff7affff04ff02ffff04ffff02ffff03ffff09ff11ff5880ffff01ff04ff58ffff04ffff02ff76ffff04ff02ffff04ff13ffff04ff29ffff04ffff0bff34ff5b80ffff04ff2bff80808080808080ff398080ffff01ff02ffff03ffff09ff11ff7880ffff01ff02ffff03ffff20ffff02ffff03ffff09ffff0121ffff0dff298080ffff01ff02ffff03ffff09ffff0cff29ff80ff3480ff5c80ffff01ff0101ff8080ff0180ff8080ff018080ffff0109ffff01ff088080ff0180ffff010980ff018080ff0180ffff04ffff02ffff03ffff09ff11ff5880ffff0159ff8080ff0180ffff04ffff02ff26ffff04ff02ffff04ff0dffff04ff0bffff04ff17ff808080808080ff80808080808080ff0180ffff01ff04ff80ffff04ff80ff17808080ff0180ffff02ffff03ff05ffff01ff04ff09ffff02ff56ffff04ff02ffff04ff0dffff04ff0bff808080808080ffff010b80ff0180ff0bff7cffff0bff34ff2880ffff0bff7cffff0bff7cffff0bff34ff2c80ff0580ffff0bff7cffff02ff32ffff04ff02ffff04ff07ffff04ffff0bff34ff3480ff8080808080ffff0bff34ff8080808080ffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff2effff04ff02ffff04ff09ff80808080ffff02ff2effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ffff04ffff04ff30ffff04ff5fff808080ffff02ff7effff04ff02ffff04ffff04ffff04ff2fff0580ffff04ff5fff82017f8080ffff04ffff02ff26ffff04ff02ffff04ff0bffff04ff05ffff01ff808080808080ffff04ff17ffff04ff81bfffff04ff82017fffff04ffff02ff2affff04ff02ffff04ff8204ffffff04ffff02ff76ffff04ff02ffff04ff09ffff04ff820affffff04ffff0bff34ff2d80ffff04ff15ff80808080808080ffff04ff8216ffff808080808080ffff04ff8205ffffff04ff820bffff808080808080808080808080ff02ff5affff04ff02ffff04ff5fffff04ff3bffff04ffff02ffff03ff17ffff01ff09ff2dffff02ff2affff04ff02ffff04ff27ffff04ffff02ff76ffff04ff02ffff04ff29ffff04ff57ffff04ffff0bff34ff81b980ffff04ff59ff80808080808080ffff04ff81b7ff80808080808080ff8080ff0180ffff04ff17ffff04ff05ffff04ff8202ffffff04ffff04ffff04ff78ffff04ffff0eff5cffff02ff2effff04ff02ffff04ffff04ff2fffff04ff82017fff808080ff8080808080ff808080ffff04ffff04ff20ffff04ffff0bff81bfff5cffff02ff2effff04ff02ffff04ffff04ff15ffff04ffff10ff82017fffff11ff8202dfff2b80ff8202ff80ff808080ff8080808080ff808080ff138080ff80808080808080808080ff018080");
-pub const CAT_PUZZLE_HASH: [u8; 32] = hex!("37bef360ee858133b69d595a906dc45d01af50379dad515eb9518abb7c1d2a7a");
+pub const CAT_PUZZLE_HASH: [u8; 32] =
+    hex!("37bef360ee858133b69d595a906dc45d01af50379dad515eb9518abb7c1d2a7a");
 
 /// ```text
 /// ; This is a "limitations_program" for use with cat.clsp.
@@ -419,21 +420,22 @@ pub const CAT_PUZZLE_HASH: [u8; 32] = hex!("37bef360ee858133b69d595a906dc45d01af
 ///       delegated_solution
 ///     )
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   (defun sha256tree1 (TREE)
 ///     (if (l TREE)
 ///         (sha256 2 (sha256tree1 (f TREE)) (sha256tree1 (r TREE)))
 ///   (sha256 1 TREE)))
-/// 
+///
 ///   (c (list AGG_SIG_UNSAFE PUBKEY (sha256tree1 delegated_puzzle))
 ///     (a delegated_puzzle (c Truths (c parent_is_cat (c lineage_proof (c delta (c inner_conditions delegated_solution))))))
 ///   )
 /// )
 /// ```
 pub const DELEGATED_TAIL: [u8; 180] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff04ffff02ff06ffff04ff02ffff04ff82027fff80808080ff80808080ffff02ff82027fffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff81bfff82057f80808080808080ffff04ffff01ff31ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff06ffff04ff02ffff04ff09ff80808080ffff02ff06ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const DELEGATED_TAIL_HASH: [u8; 32] = hex!("999c3696e167f8a79d938adc11feba3a3dcb39ccff69a426d570706e7b8ec399");
+pub const DELEGATED_TAIL_HASH: [u8; 32] =
+    hex!("999c3696e167f8a79d938adc11feba3a3dcb39ccff69a426d570706e7b8ec399");
 
 /// ```text
 /// ; This is a "limitations_program" for use with cat.clsp.
@@ -446,14 +448,16 @@ pub const DELEGATED_TAIL_HASH: [u8; 32] = hex!("999c3696e167f8a79d938adc11feba3a
 ///     inner_conditions
 ///     _
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   (list (list AGG_SIG_ME PUBKEY delta))  ; Careful with a delta of zero, the bytecode is 80 not 00
 /// )
 /// ```
-pub const EVERYTHING_WITH_SIGNATURE: [u8; 41] = hex!("ff02ffff01ff04ffff04ff02ffff04ff05ffff04ff5fff80808080ff8080ffff04ffff0132ff018080");
-pub const EVERYTHING_WITH_SIGNATURE_HASH: [u8; 32] = hex!("1720d13250a7c16988eaf530331cefa9dd57a76b2c82236bec8bbbff91499b89");
+pub const EVERYTHING_WITH_SIGNATURE: [u8; 41] =
+    hex!("ff02ffff01ff04ffff04ff02ffff04ff05ffff04ff5fff80808080ff8080ffff04ffff0132ff018080");
+pub const EVERYTHING_WITH_SIGNATURE_HASH: [u8; 32] =
+    hex!("1720d13250a7c16988eaf530331cefa9dd57a76b2c82236bec8bbbff91499b89");
 
 /// ```text
 /// ; This is a TAIL for use with cat.clvm.
@@ -474,10 +478,10 @@ pub const EVERYTHING_WITH_SIGNATURE_HASH: [u8; 32] = hex!("1720d13250a7c16988eaf
 ///       parent_amount
 ///     )
 ///   )
-/// 
+///
 ///   (include cat_truths.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   (if delta
 ///       (x)
 ///       (if (= (my_parent_cat_truth Truths) GENESIS_ID)
@@ -496,11 +500,12 @@ pub const EVERYTHING_WITH_SIGNATURE_HASH: [u8; 32] = hex!("1720d13250a7c16988eaf
 ///           )
 ///       )
 ///   )
-/// 
+///
 /// )
 /// ```
 pub const GENESIS_BY_COIN_ID_OR_SINGLETON: [u8; 79] = hex!("ff02ffff03ff5fffff01ff0880ffff01ff02ffff03ffff09ff5bff0280ff80ffff01ff02ffff03ffff09ff5bffff0bff82027fff05ff82057f8080ff80ffff01ff088080ff018080ff018080ff0180");
-pub const GENESIS_BY_COIN_ID_OR_SINGLETON_HASH: [u8; 32] = hex!("40170305e3a71c3e7523f37fbcfc3188f9f949da0818a6331f28251e76e8c56f");
+pub const GENESIS_BY_COIN_ID_OR_SINGLETON_HASH: [u8; 32] =
+    hex!("40170305e3a71c3e7523f37fbcfc3188f9f949da0818a6331f28251e76e8c56f");
 
 /// ```text
 /// ; This is a TAIL for use with cat.clvm.
@@ -517,9 +522,9 @@ pub const GENESIS_BY_COIN_ID_OR_SINGLETON_HASH: [u8; 32] = hex!("40170305e3a71c3
 ///     inner_conditions
 ///     _
 ///   )
-/// 
+///
 ///   (include cat_truths.clib)
-/// 
+///
 ///   (if delta
 ///       (x)
 ///       (if (= (my_parent_cat_truth Truths) GENESIS_ID)
@@ -527,11 +532,14 @@ pub const GENESIS_BY_COIN_ID_OR_SINGLETON_HASH: [u8; 32] = hex!("40170305e3a71c3
 ///           (x)
 ///       )
 ///   )
-/// 
+///
 /// )
 /// ```
-pub const GENESIS_BY_COIN_ID: [u8; 45] = hex!("ff02ffff03ff2fffff01ff0880ffff01ff02ffff03ffff09ff2dff0280ff80ffff01ff088080ff018080ff0180");
-pub const GENESIS_BY_COIN_ID_HASH: [u8; 32] = hex!("493afb89eed93ab86741b2aa61b8f5de495d33ff9b781dfc8919e602b2afa150");
+pub const GENESIS_BY_COIN_ID: [u8; 45] = hex!(
+    "ff02ffff03ff2fffff01ff0880ffff01ff02ffff03ffff09ff2dff0280ff80ffff01ff088080ff018080ff0180"
+);
+pub const GENESIS_BY_COIN_ID_HASH: [u8; 32] =
+    hex!("493afb89eed93ab86741b2aa61b8f5de495d33ff9b781dfc8919e602b2afa150");
 
 /// ```text
 /// ; This is a "limitations_program" for use with cat.clsp.
@@ -546,9 +554,9 @@ pub const GENESIS_BY_COIN_ID_HASH: [u8; 32] = hex!("493afb89eed93ab86741b2aa61b8
 ///     inner_conditions
 ///     (parent_parent_id parent_amount)
 ///   )
-/// 
+///
 ///   (include cat_truths.clib)
-/// 
+///
 ///   ; Returns nil since we don't need to add any conditions
 ///   (if delta
 ///       (x)
@@ -560,7 +568,8 @@ pub const GENESIS_BY_COIN_ID_HASH: [u8; 32] = hex!("493afb89eed93ab86741b2aa61b8
 /// )
 /// ```
 pub const GENESIS_BY_PUZZLE_HASH: [u8; 57] = hex!("ff02ffff03ff2fffff01ff0880ffff01ff02ffff03ffff09ffff0bff82013fff02ff8202bf80ff2d80ff80ffff01ff088080ff018080ff0180");
-pub const GENESIS_BY_PUZZLE_HASH_HASH: [u8; 32] = hex!("de5a6e06d41518be97ff6365694f4f89475dda773dede267caa33da63b434e36");
+pub const GENESIS_BY_PUZZLE_HASH_HASH: [u8; 32] =
+    hex!("de5a6e06d41518be97ff6365694f4f89475dda773dede267caa33da63b434e36");
 
 /// ```text
 /// ; This file is what the first form the CAT takes, and then it gets immediately eve spent out of here.
@@ -582,7 +591,8 @@ pub const GENESIS_BY_PUZZLE_HASH_HASH: [u8; 32] = hex!("de5a6e06d41518be97ff6365
 /// )
 /// ```
 pub const DAO_CAT_EVE: [u8; 112] = hex!("ff02ffff01ff04ffff04ff06ffff04ff05ffff04ff0bffff04ffff04ff05ff8080ff8080808080ffff04ffff04ff04ffff04ff0bff808080ffff04ffff04ff06ffff04ff80ffff04ffff01818fffff04ff17ffff04ff2fff808080808080ff80808080ffff04ffff01ff4933ff018080");
-pub const DAO_CAT_EVE_HASH: [u8; 32] = hex!("488f55bedaca5a599544dfd5ab341e2e5c7e6fca67d9b98a3d856f876c52f53e");
+pub const DAO_CAT_EVE_HASH: [u8; 32] =
+    hex!("488f55bedaca5a599544dfd5ab341e2e5c7e6fca67d9b98a3d856f876c52f53e");
 
 /// ```text
 /// (mod (
@@ -594,21 +604,21 @@ pub const DAO_CAT_EVE_HASH: [u8; 32] = hex!("488f55bedaca5a599544dfd5ab341e2e5c7
 ///   )
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   (defun calculate_singleton_puzzle_hash (PROPOSAL_SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f PROPOSAL_SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree PROPOSAL_SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun create_parent_conditions (parent_id new_puzzle_hash amount)
 ///     (list
 ///       (list ASSERT_COIN_ANNOUNCEMENT (sha256 parent_id (sha256tree (list 'm' new_puzzle_hash))))
 ///       (list ASSERT_MY_PARENT_ID parent_id)
 ///     )
 ///   )
-/// 
+///
 ///   (c
 ///     (list CREATE_COIN new_puzzle_hash amount (list new_puzzle_hash))
 ///     (c
@@ -623,32 +633,33 @@ pub const DAO_CAT_EVE_HASH: [u8; 32] = hex!("488f55bedaca5a599544dfd5ab341e2e5c7
 /// )
 /// ```
 pub const DAO_CAT_LAUNCHER: [u8; 529] = hex!("ff02ffff01ff04ffff04ff34ffff04ff2fffff04ff5fffff04ffff04ff2fff8080ff8080808080ffff04ffff04ff28ffff04ff5fff808080ffff02ff36ffff04ff02ffff04ffff0bff17ffff02ff26ffff04ff02ffff04ff05ffff04ff0bff8080808080ff3c80ffff04ff2fffff04ff5fff8080808080808080ffff04ffff01ffffff3dff4947ffff0233ff0401ffff01ff02ff02ffff03ff05ffff01ff02ff3affff04ff02ffff04ff0dffff04ffff0bff2affff0bff3cff2c80ffff0bff2affff0bff2affff0bff3cff1280ff0980ffff0bff2aff0bffff0bff3cff8080808080ff8080808080ffff010b80ff0180ffffff02ff2effff04ff02ffff04ff09ffff04ff0bffff04ffff02ff3effff04ff02ffff04ff05ff80808080ff808080808080ff04ffff04ff10ffff04ffff0bff05ffff02ff3effff04ff02ffff04ffff04ffff016dffff04ff0bff808080ff8080808080ff808080ffff04ffff04ff38ffff04ff05ff808080ff808080ffff0bff2affff0bff3cff2480ffff0bff2affff0bff2affff0bff3cff1280ff0580ffff0bff2affff02ff3affff04ff02ffff04ff07ffff04ffff0bff3cff3c80ff8080808080ffff0bff3cff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff3effff04ff02ffff04ff09ff80808080ffff02ff3effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const DAO_CAT_LAUNCHER_HASH: [u8; 32] = hex!("a01a838d18d4e031e937c79fa3f80f213fa00a3e64af6c16a1f137770cd3a567");
+pub const DAO_CAT_LAUNCHER_HASH: [u8; 32] =
+    hex!("a01a838d18d4e031e937c79fa3f80f213fa00a3e64af6c16a1f137770cd3a567");
 
 /// ```text
 /// ; This code is the end state of a proposal or a dividend.
 /// ; It is an oracle which simply recreates itself and emits an announcement that it has concluded operation
-/// 
+///
 /// (mod (SINGLETON_STRUCT DAO_FINISHED_STATE_MOD_HASH my_amount)
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defun wrap_in_singleton (SINGLETON_STRUCT my_inner_puzhash)
 ///     (puzzle-hash-of-curried-function (f SINGLETON_STRUCT)
 ///       my_inner_puzhash
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun recreate_self (SINGLETON_STRUCT DAO_FINISHED_STATE_MOD_HASH)
 ///     (puzzle-hash-of-curried-function DAO_FINISHED_STATE_MOD_HASH
 ///       (sha256 ONE DAO_FINISHED_STATE_MOD_HASH)
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   (let
 ///     (
 ///       (my_inner_puzhash (recreate_self SINGLETON_STRUCT DAO_FINISHED_STATE_MOD_HASH))
@@ -663,7 +674,8 @@ pub const DAO_CAT_LAUNCHER_HASH: [u8; 32] = hex!("a01a838d18d4e031e937c79fa3f80f
 /// )
 /// ```
 pub const DAO_FINISHED_STATE: [u8; 771] = hex!("ff02ffff01ff04ffff04ffff0148ffff04ffff02ff16ffff04ff02ffff04ffff05ffff06ff018080ffff04ffff02ff1effff04ff02ffff04ff05ffff04ff0bff8080808080ff8080808080ffff01808080ffff04ffff04ffff0149ffff04ffff05ffff06ffff06ffff06ff0180808080ffff01808080ffff04ffff04ffff0133ffff04ffff02ff1effff04ff02ffff04ff05ffff04ff0bff8080808080ffff04ffff05ffff06ffff06ffff06ff0180808080ffff0180808080ffff04ffff04ffff013effff04ffff0180ffff01808080ffff018080808080ffff04ffff01ffffff02ffff03ff05ffff01ff02ffff01ff02ff08ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff08ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ffff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff0affff04ff02ffff04ffff05ff0580ff80808080ffff02ff0affff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ffff02ff0cffff04ff02ffff04ff09ffff04ff0bffff04ffff02ff0affff04ff02ffff04ff05ff80808080ff808080808080ff02ff0cffff04ff02ffff04ff0bffff04ffff0bffff0101ff0b80ffff04ffff02ff0affff04ff02ffff04ff05ff80808080ff808080808080ff018080");
-pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d110880693a9ecc37a6529891ec979d0f3e760eba");
+pub const DAO_FINISHED_STATE_HASH: [u8; 32] =
+    hex!("694c99e1fb07671771bbca3d110880693a9ecc37a6529891ec979d0f3e760eba");
 
 /// ```text
 /// ; This code is the "voting mode" for a DAO CAT.
@@ -671,7 +683,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 /// ; It locks the CAT in while it has active votes/dividends going on.
 /// ; Once a vote or dividend closes, then the coin can spend itself to remove that coin from the "active list"
 /// ; If the "active list" is empty the coin can leave the voting mode
-/// 
+///
 /// (mod (
 ///     ; this is the first curry
 ///     SINGLETON_MOD_HASH
@@ -697,14 +709,14 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defun calculate_finished_state (singleton_struct dao_finished_state)
 ///     (puzzle-hash-of-curried-function dao_finished_state
 ///       (sha256 ONE dao_finished_state)
 ///       (sha256tree singleton_struct)
 ///     )
 ///   )
-/// 
+///
 ///   ; take two lists and merge them into one
 ///   (defun merge_list (list_a list_b)
 ///     (if list_a
@@ -712,7 +724,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///         list_b
 ///     )
 ///   )
-/// 
+///
 ///   (defun wrap_in_cat_layer (CAT_MOD_HASH CAT_TAIL_HASH INNERPUZHASH)
 ///     (puzzle-hash-of-curried-function CAT_MOD_HASH
 ///       INNERPUZHASH
@@ -720,7 +732,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///       (sha256 ONE CAT_MOD_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   ; loop through conditions and check that they aren't trying to create anything they shouldn't
 ///   (defun check_conditions (conditions vote_added_puzhash my_amount message vote_amount my_inner_puzhash seen_vote seen_change)
 ///     (if conditions
@@ -762,7 +774,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   ; go through our list of active votes and check that we aren't revoting
 ///   (defun check_not_previously_voted (
 ///       SINGLETON_MOD_HASH
@@ -797,15 +809,15 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///         )
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   (defun calculate_singleton_puzzle_hash (PROPOSAL_SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f PROPOSAL_SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree PROPOSAL_SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_lockup_puzzlehash (
 ///       SELF_HASH
 ///       active_votes
@@ -817,7 +829,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///       (sha256 ONE SELF_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun for_every_removal_id (
 ///       SINGLETON_MOD_HASH
 ///       SINGLETON_LAUNCHER_PUZHASH
@@ -874,14 +886,14 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   (defun remove_list_one_entries_from_list_two (list_one list_two)
 ///     (if list_one
 ///         (remove_item_from_list (f list_one) (remove_list_one_entries_from_list_two (r list_one) list_two))
 ///         list_two
 ///     )
 ///   )
-/// 
+///
 ///   (defun remove_item_from_list (item list_one)
 ///     (if list_one
 ///         (if (= (f list_one) item)
@@ -891,8 +903,8 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///         ()  ; item was never in list_one, return list_two entirely
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   ; main
 ///   (if my_id
 ///       (c (list ASSERT_MY_PUZZLEHASH (wrap_in_cat_layer CAT_MOD_HASH CAT_TAIL_HASH my_inner_puzhash))
@@ -913,7 +925,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///                   )
 ///                   (list REMARK)
 ///               )
-/// 
+///
 ///               ; loop over conditions and check that we aren't trying to leave voting state
 ///               (check_conditions
 ///                 (a INNERPUZ inner_solution)
@@ -934,7 +946,7 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 ///           )
 ///         )
 ///       )
-/// 
+///
 ///       ; return to return_address or remove something from active list - check if our locked list is empty
 ///       (if ACTIVE_VOTES
 ///           (for_every_removal_id  ; locked list is not empty, so we must be trying to remove something from it
@@ -956,13 +968,14 @@ pub const DAO_FINISHED_STATE_HASH: [u8; 32] = hex!("694c99e1fb07671771bbca3d1108
 /// )
 /// ```
 pub const DAO_LOCKUP: [u8; 3140] = hex!("ff02ffff01ff02ffff03ff8205ffffff01ff02ffff01ff04ffff04ffff0148ffff04ffff02ff2cffff04ff02ffff04ff2fffff04ff5fffff04ff8302ffffff808080808080ffff01808080ffff04ffff04ffff0149ffff04ff8217ffffff01808080ffff04ffff04ffff0146ffff04ff8205ffffff01808080ffff04ffff02ffff03ff822fffffff01ff02ffff01ff02ff12ffff04ff02ffff04ff05ffff04ff0bffff04ff8202ffffff04ff8205ffffff04ff822fffffff04ff82017fffff04ff825fffff80808080808080808080ff0180ffff01ff02ffff01ff04ffff0101ffff018080ff018080ff0180ffff02ff3cffff04ff02ffff04ffff02ff8202ffff820bff80ffff04ffff02ff3affff04ff02ffff04ff8200bfffff04ffff02ffff03ff822fffffff01ff02ffff01ff04ff822fffff82017f80ff0180ffff01ff02ffff0182017fff018080ff0180ffff04ffff02ffff03ff8305ffffffff01ff02ffff018305ffffff0180ffff01ff02ffff01ff02ff38ffff04ff02ffff04ff8202ffff80808080ff018080ff0180ff808080808080ffff04ff8217ffffff04ffff02ff38ffff04ff02ffff04ffff04ff822fffffff04ff83017fffffff04ff8300bfffffff04ff8205ffffff018080808080ff80808080ffff04ff83017fffffff04ff8302ffffffff04ffff0180ffff04ffff0180ff808080808080808080808080808080ff0180ffff01ff02ffff01ff02ffff03ff82017fffff01ff02ffff01ff02ff16ffff04ff02ffff04ff05ffff04ff0bffff04ff8200bfffff04ff17ffff04ff2fffff04ff5fffff04ff82017fffff04ff8202ffffff04ff822fffffff04ff8217ffffff04ffff0180ff8080808080808080808080808080ff0180ffff01ff02ffff01ff02ff8202ffff820bff80ff018080ff0180ff018080ff0180ffff04ffff01ffffffff02ffff03ff05ffff01ff02ffff01ff02ff10ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ffff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff10ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff38ffff04ff02ffff04ffff05ff0580ff80808080ffff02ff38ffff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ffff02ff28ffff04ff02ffff04ff0bffff04ffff0bffff0101ff0b80ffff04ffff02ff38ffff04ff02ffff04ff05ff80808080ff808080808080ffff02ff28ffff04ff02ffff04ff05ffff04ff17ffff04ffff0bffff0101ff0b80ffff04ffff0bffff0101ff0580ff80808080808080ff02ffff03ff05ffff01ff02ffff01ff02ffff03ffff09ffff05ffff05ff058080ffff013380ffff01ff02ffff01ff02ffff03ffff09ffff05ffff06ffff05ff05808080ff0b80ffff01ff02ffff01ff02ffff03ff82017fffff01ff02ffff01ff0880ff0180ffff01ff02ffff01ff02ffff03ffff09ffff05ffff06ffff06ffff05ff0580808080ff1780ffff01ff02ffff01ff02ffff03ff8202ffffff01ff02ffff01ff0880ff0180ffff01ff02ffff01ff04ffff05ff0580ffff02ff3cffff04ff02ffff04ffff06ff0580ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ffff0101ffff04ffff0101ff808080808080808080808080ff018080ff0180ff0180ffff01ff02ffff01ff02ffff03ffff09ffff05ffff06ffff06ffff05ff0580808080ff5f80ffff01ff02ffff01ff04ffff05ff0580ffff02ff3cffff04ff02ffff04ffff06ff0580ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ffff0101ffff04ff8202ffff808080808080808080808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff018080ff0180ff018080ff0180ff0180ffff01ff02ffff01ff02ffff03ffff22ffff09ffff05ffff06ffff05ff05808080ff8200bf80ffff20ff8202ff80ffff09ffff05ffff06ffff06ffff05ff0580808080ffff11ff17ff5f808080ffff01ff02ffff01ff04ffff05ff0580ffff02ff3cffff04ff02ffff04ffff06ff0580ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ff82017fffff04ffff0101ff808080808080808080808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff018080ff0180ff0180ffff01ff02ffff01ff02ffff03ffff09ffff05ffff05ff058080ffff013e80ffff01ff02ffff01ff02ffff03ffff09ffff05ffff06ffff05ff05808080ff2f80ffff01ff02ffff01ff04ffff05ff0580ffff02ff3cffff04ff02ffff04ffff06ff0580ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ff82017fffff04ff8202ffff808080808080808080808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff04ffff05ff0580ffff02ff3cffff04ff02ffff04ffff06ff0580ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ff82017fffff04ff8202ffff808080808080808080808080ff018080ff0180ff018080ff0180ff0180ffff01ff02ffff01ff02ffff03ffff22ff82017fff8202ff80ffff01ff02ffff01ff0180ff0180ffff01ff02ffff01ff0880ff018080ff0180ff018080ff0180ffffff02ffff03ff8200bfffff01ff02ffff01ff02ffff03ffff09ff5fffff05ff8200bf8080ffff01ff02ffff01ff0880ff0180ffff01ff02ffff01ff02ff12ffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ffff06ff8200bf80ffff04ff82017fff80808080808080808080ff018080ff0180ff0180ffff01ff02ffff01ff04ffff013fffff04ffff0bffff02ff2affff04ff02ffff04ffff04ff05ffff04ff5fff0b8080ffff04ff82017fff8080808080ff2f80ffff01808080ff018080ff0180ffff02ff28ffff04ff02ffff04ff09ffff04ff0bffff04ffff02ff38ffff04ff02ffff04ff05ff80808080ff808080808080ff02ff28ffff04ff02ffff04ff05ffff04ff17ffff04ffff02ff38ffff04ff02ffff04ff0bff80808080ffff04ffff0bffff0101ff0580ff80808080808080ffff02ffff03ff8205ffffff01ff02ffff01ff04ffff04ffff013fffff04ffff0bffff02ff2affff04ff02ffff04ffff04ff05ffff04ffff05ff8205ff80ff0b8080ffff04ffff02ff14ffff04ff02ffff04ffff04ff05ffff04ffff05ff8205ff80ff0b8080ffff04ff2fff8080808080ff8080808080ffff018080ffff01808080ffff02ff16ffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ff82017fffff04ff8202ffffff04ffff06ff8205ff80ffff04ff820bffffff04ffff04ffff05ff8205ff80ff8217ff80ff808080808080808080808080808080ff0180ffff01ff02ffff01ff04ffff04ffff0149ffff04ff820bffffff01808080ffff04ffff04ffff0133ffff04ffff02ff3affff04ff02ffff04ff17ffff04ffff02ff2effff04ff02ffff04ff8217ffffff04ff82017fff8080808080ffff04ffff02ff38ffff04ff02ffff04ff8202ffff80808080ff808080808080ffff04ff820bffffff0180808080ffff01808080ff018080ff0180ffff02ffff03ff05ffff01ff02ffff01ff02ff3effff04ff02ffff04ffff05ff0580ffff04ffff02ff2effff04ff02ffff04ffff06ff0580ffff04ff0bff8080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ff02ffff03ff0bffff01ff02ffff01ff02ffff03ffff09ffff05ff0b80ff0580ffff01ff02ffff01ff06ff0b80ff0180ffff01ff02ffff01ff04ffff05ff0b80ffff02ff3effff04ff02ffff04ff05ffff04ffff06ff0b80ff808080808080ff018080ff0180ff0180ffff01ff02ffff01ff0180ff018080ff0180ff018080");
-pub const DAO_LOCKUP_HASH: [u8; 32] = hex!("d6215f0916715a69fbbf2d1a679f437fde81787adeb90c666642fb9c2deff7ce");
+pub const DAO_LOCKUP_HASH: [u8; 32] =
+    hex!("d6215f0916715a69fbbf2d1a679f437fde81787adeb90c666642fb9c2deff7ce");
 
 /// ```text
 /// ; This is a persistent timer for a proposal which allows it to have a relative time that survives despite it being recreated.
 /// ; The closing time is contained in the timelock and passed in to the solution, and confirmed via an announcement from the Proposal
 /// ; It creates/asserts announcements to pair it with the finishing spend of a proposal
-/// 
+///
 /// (mod (
 ///     PROPOSAL_SELF_HASH
 ///     MY_PARENT_SINGLETON_STRUCT
@@ -976,14 +989,14 @@ pub const DAO_LOCKUP_HASH: [u8; 32] = hex!("d6215f0916715a69fbbf2d1a679f437fde81
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defun calculate_singleton_puzzle_hash (PROPOSAL_SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f PROPOSAL_SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree PROPOSAL_SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_proposal_puzzlehash (
 ///       PROPOSAL_SINGLETON_STRUCT
 ///       PROPOSAL_SELF_HASH
@@ -1002,7 +1015,7 @@ pub const DAO_LOCKUP_HASH: [u8; 32] = hex!("d6215f0916715a69fbbf2d1a679f437fde81
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   ; main
 ///   (list
 ///     (list ASSERT_HEIGHT_RELATIVE proposal_timelock)
@@ -1033,13 +1046,14 @@ pub const DAO_LOCKUP_HASH: [u8; 32] = hex!("d6215f0916715a69fbbf2d1a679f437fde81
 ///         )
 ///         parent_amount
 ///       )
-/// 
+///
 ///     )
 ///   )
 /// )
 /// ```
 pub const DAO_PROPOSAL_TIMER: [u8; 825] = hex!("ff02ffff01ff04ffff04ffff0152ffff04ff8200bfffff01808080ffff04ffff04ffff013effff04ffff05ffff06ff0b8080ffff01808080ffff04ffff04ffff013fffff04ffff0bffff02ff1effff04ff02ffff04ff0bffff04ff05ffff04ff17ffff04ff2fffff04ff5fff8080808080808080ff8200bf80ffff01808080ffff04ffff04ffff0147ffff04ffff0bff82017fffff02ff1effff04ff02ffff04ff0bffff04ff05ffff04ffff0180ffff04ffff0180ffff04ff5fff8080808080808080ff8202ff80ffff01808080ffff018080808080ffff04ffff01ffffff02ffff03ff05ffff01ff02ffff01ff02ff08ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff08ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ffff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff0affff04ff02ffff04ffff05ff0580ff80808080ffff02ff0affff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ffff02ff0cffff04ff02ffff04ff09ffff04ff0bffff04ffff02ff0affff04ff02ffff04ff05ff80808080ff808080808080ff02ff16ffff04ff02ffff04ff05ffff04ffff02ff0cffff04ff02ffff04ff0bffff04ffff0bffff0101ff2f80ffff04ffff0bffff0101ff1780ffff04ffff0bffff0101ff5f80ffff04ffff0bffff0101ff1580ffff04ffff0bffff0101ff0b80ff808080808080808080ff8080808080ff018080");
-pub const DAO_PROPOSAL_TIMER_HASH: [u8; 32] = hex!("1acd912fca662d1474f7a6c762280fc1430875bef518883387086c1125027526");
+pub const DAO_PROPOSAL_TIMER_HASH: [u8; 32] =
+    hex!("1acd912fca662d1474f7a6c762280fc1430875bef518883387086c1125027526");
 
 /// ```text
 /// (mod
@@ -1060,25 +1074,25 @@ pub const DAO_PROPOSAL_TIMER_HASH: [u8; 32] = hex!("1acd912fca662d1474f7a6c76228
 ///     )
 ///     conditions
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include utility_macros.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defconstant TEN_THOUSAND 10000)
-/// 
+///
 ///   (defun-inline calculate_win_percentage (TOTAL PERCENTAGE)
 ///     (f (divmod (* TOTAL PERCENTAGE) TEN_THOUSAND))
 ///   )
-/// 
+///
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline calculate_proposal_puzzle (
 ///       PROPOSAL_SELF_HASH
 ///       proposal_singleton_id
@@ -1094,7 +1108,7 @@ pub const DAO_PROPOSAL_TIMER_HASH: [u8; 32] = hex!("1acd912fca662d1474f7a6c76228
 ///       (sha256 ONE PROPOSAL_SELF_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (assert
 ///     ; (= (sha256tree my_solution) announcement_args) - quex suggested this. We don't need to check it now. Can be used for future functionality.
 ///     (> (+ coin_amount ONE) PROPOSAL_MINIMUM_AMOUNT)  ; >=
@@ -1131,7 +1145,8 @@ pub const DAO_PROPOSAL_TIMER_HASH: [u8; 32] = hex!("1acd912fca662d1474f7a6c76228
 /// )
 /// ```
 pub const DAO_PROPOSAL_VALIDATOR: [u8; 1170] = hex!("ff02ffff01ff02ffff03ffff15ffff10ff825effffff010180ff1780ffff01ff02ffff01ff02ffff03ffff02ff1effff04ff02ffff04ff820affffff04ff5fff8080808080ffff01ff02ffff01ff02ffff03ffff02ff1effff04ff02ffff04ff8216ffffff04ffff05ffff14ffff12ff820affff8200bf80ffff018227108080ff8080808080ffff01ff02ffff01ff02ffff03ffff09ff82027fffff02ff0affff04ff02ffff04ff822effffff04ffff02ff0cffff04ff02ffff04ffff05ffff04ffff05ff0580ffff04ff8204ffffff06ffff06ff058080808080ffff04ffff02ff0cffff04ff02ffff04ff0bffff04ffff0bffff0101ff820aff80ffff04ffff0bffff0101ff8216ff80ffff04ffff0bffff0101ff82057f80ffff04ffff0bffff0101ff8204ff80ffff04ffff0bffff0101ff0b80ff808080808080808080ffff04ffff02ff16ffff04ff02ffff04ffff04ffff05ff0580ffff04ff8204ffffff06ffff06ff0580808080ff80808080ff808080808080ffff04ff825effff80808080808080ffff01ff02ffff01ff04ffff04ffff013effff04ff8204ffffff01808080ffff02ffff03ffff15ffff11ff825effffff010180ffff018080ffff01ff02ffff01ff04ffff04ffff0133ffff04ff2fffff04ffff11ff825effffff010180ffff04ffff04ffff05ffff06ff058080ffff018080ffff018080808080ff8205ff80ff0180ffff01ff02ffff018205ffff018080ff018080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff0880ff018080ff0180ffff04ffff01ffffff02ffff03ff05ffff01ff02ffff01ff02ff08ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff08ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ffff02ffff03ffff22ffff09ffff0dff0580ffff012080ffff09ffff0dff0b80ffff012080ffff15ff17ffff0181ff8080ffff01ff02ffff01ff0bff05ff0bff1780ff0180ffff01ff02ffff01ff0880ff018080ff0180ffff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff16ffff04ff02ffff04ffff05ff0580ff80808080ffff02ff16ffff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ff20ffff15ff0bff058080ff018080");
-pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab94dcadcafa9d008d39661763841c7d92065b3fd34");
+pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] =
+    hex!("92209b0f7efb2dbaaaa3aab94dcadcafa9d008d39661763841c7d92065b3fd34");
 
 /// ```text
 /// (mod (
@@ -1170,9 +1185,9 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///   (include utility_macros.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defconstant TEN_THOUSAND 10000)
-/// 
+///
 ///   (defun is_member (e L)
 ///     (if L
 ///         (if (= e (f L))
@@ -1182,18 +1197,18 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///         0
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline calculate_win_percentage (TOTAL PERCENTAGE)
 ///     (f (divmod (* TOTAL PERCENTAGE) TEN_THOUSAND))
 ///   )
-/// 
+///
 ///   (defun calculate_finished_state (singleton_struct DAO_FINISHED_STATE_MOD_HASH)
 ///     (puzzle-hash-of-curried-function DAO_FINISHED_STATE_MOD_HASH
 ///       (sha256 ONE DAO_FINISHED_STATE_MOD_HASH)
 ///       (sha256tree singleton_struct)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_timer_puzhash (
 ///       PROPOSAL_TIMER_MOD_HASH
 ///       SELF_HASH
@@ -1204,7 +1219,7 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///       (sha256 ONE SELF_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_lockup_puzzlehash (
 ///       LOCKUP_SELF_HASH
 ///       previous_votes
@@ -1216,7 +1231,7 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///       (sha256 ONE LOCKUP_SELF_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun recreate_self (
 ///       SELF_HASH
 ///       PROPOSAL_ID
@@ -1232,7 +1247,7 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///       (sha256 ONE SELF_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun wrap_in_cat_layer (CAT_MOD_HASH CAT_TAIL_HASH INNERPUZHASH)
 ///     (puzzle-hash-of-curried-function CAT_MOD_HASH
 ///       INNERPUZHASH
@@ -1240,14 +1255,14 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///       (sha256 ONE CAT_MOD_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_singleton_puzzle_hash (PROPOSAL_SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f PROPOSAL_SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree PROPOSAL_SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_treasury_puzzlehash (
 ///       treasury_singleton_struct
 ///       TREASURY_MOD_HASH
@@ -1259,7 +1274,7 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///       self_destruct_time
 ///       oracle_spend_delay
 ///     )
-/// 
+///
 ///     (calculate_singleton_puzzle_hash treasury_singleton_struct
 ///       (puzzle-hash-of-curried-function TREASURY_MOD_HASH
 ///         (sha256 ONE oracle_spend_delay)
@@ -1273,7 +1288,7 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun loop_over_vote_coins (
 ///       SINGLETON_ID
 ///       LOCKUP_SELF_HASH
@@ -1360,10 +1375,10 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///           )
 ///         )
 ///     )
-/// 
+///
 ///   )
-/// 
-/// 
+///
+///
 ///   (if self_destruct_flag
 ///       ; assert self_destruct_time > proposal_timelock_length
 ///       ; this is the code path for if we've not been accepted by the treasury for a long time, and we're "bad" for some reason
@@ -1410,7 +1425,7 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///                       PROPOSAL_TIMER_MOD_HASH
 ///                       SELF_HASH
 ///                       (c SINGLETON_MOD_HASH (c SINGLETON_ID LAUNCHER_PUZZLE_HASH))
-/// 
+///
 ///                     )
 ///                     SINGLETON_ID
 ///                   )
@@ -1468,8 +1483,8 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 ///               )
 ///             )
 ///           )
-/// 
-/// 
+///
+///
 ///           ; no soft_close_length so run the add votes path
 ///           (loop_over_vote_coins
 ///             SINGLETON_ID
@@ -1513,7 +1528,8 @@ pub const DAO_PROPOSAL_VALIDATOR_HASH: [u8; 32] = hex!("92209b0f7efb2dbaaaa3aab9
 /// )
 /// ```
 pub const DAO_PROPOSAL: [u8; 3270] = hex!("ff02ffff01ff02ffff03ff8402ffffffffff01ff02ffff01ff02ffff03ffff15ff8400bfffffff8305ffff80ffff01ff02ffff01ff04ffff04ffff0133ffff04ffff02ff3cffff04ff02ffff04ffff04ff0bffff04ff8217ffff178080ffff04ff5fff8080808080ffff04ffff0101ffff04ffff04ff8205ffffff018080ffff018080808080ffff04ffff04ffff0152ffff04ff8400bfffffffff01808080ffff04ffff04ffff013fffff04ffff0bffff02ff2effff04ff02ffff04ffff04ff0bffff04ff8205ffff178080ffff04ff8200bfffff04ff83017fffffff04ff8305ffffffff04ff835fffffffff04ff8317ffffffff04ff830bffffffff04ff8400bfffffffff04ff84017fffffff808080808080808080808080ffff018080ffff01808080ffff0180808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff02ffff03ff835fffffffff01ff02ffff01ff04ffff04ffff0152ffff04ff835fffffffff01808080ffff04ffff04ffff0133ffff04ffff02ff3cffff04ff02ffff04ffff04ff0bffff04ff8217ffff178080ffff04ff5fff8080808080ffff04ffff0101ffff04ffff04ff8205ffffff018080ffff018080808080ffff04ffff04ffff013fffff04ffff0bffff02ff12ffff04ff02ffff04ff05ffff04ff820bffffff04ffff04ff0bffff04ff8217ffff178080ff808080808080ff8217ff80ffff01808080ffff04ffff04ffff013effff04ff8305ffffffff01808080ffff02ffff03ffff22ffff02ff10ffff04ff02ffff04ff8300bfffffff04ff8317ffffff8080808080ffff02ff10ffff04ff02ffff04ff825fffffff04ffff05ffff14ffff12ff8300bfffff830bffff80ffff018227108080ff808080808080ffff01ff02ffff01ff04ffff04ffff013cffff04ffff02ff14ffff04ff02ffff04ffff04ff822fffffff04ffff0180ffff01808080ff80808080ffff01808080ffff04ffff04ffff013fffff04ffff0bffff02ff2effff04ff02ffff04ffff04ff0bffff04ff8205ffff178080ffff04ff8200bfffff04ff83017fffffff04ff8305ffffffff04ff835fffffffff04ff8317ffffffff04ff830bffffffff04ff8400bfffffffff04ff84017fffffff808080808080808080808080ff8217ff80ffff01808080ffff01808080ff0180ffff01ff02ffff01ff04ffff04ffff013fffff04ffff0bffff02ff2effff04ff02ffff04ffff04ff0bffff04ff8205ffff178080ffff04ff8200bfffff04ff83017fffffff04ff8305ffffffff04ff835fffffffff04ff8317ffffffff04ff830bffffffff04ff8400bfffffffff04ff84017fffffff808080808080808080808080ffff018080ffff01808080ffff018080ff018080ff018080808080ff0180ffff01ff02ffff01ff02ff3effff04ff02ffff04ff8217ffffff04ff82017fffff04ff2fffff04ff8202ffffff04ff8205ffffff04ff820bffffff04ff825fffffff04ff8300bfffffff04ff822fffffff04ff8305ffffffff04ff83017fffffff04ff830bffffffff04ff8317ffffffff04ff8302ffffffff04ffff0180ffff04ffff02ffff03ffff21ff825fffff8300bfff80ffff01ff02ffff01ff0180ff0180ffff01ff02ffff01ff04ffff04ffff0133ffff04ffff02ff12ffff04ff02ffff04ff05ffff04ff820bffffff04ffff04ff0bffff04ff8217ffff178080ff808080808080ffff04ffff0180ffff0180808080ffff02ffff03ffff09ffff02ff14ffff04ff02ffff04ff832fffffff80808080ff822fff80ffff01ff02ffff01ff0180ff0180ffff01ff02ffff01ff0880ff018080ff018080ff018080ff0180ffff04ff8405ffffffffff04ffff0180ff808080808080808080808080808080808080808080ff018080ff0180ff018080ff0180ffff04ffff01ffffffff20ffff15ff0bff058080ffff02ffff03ff05ffff01ff02ffff01ff02ff28ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff28ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ffff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff14ffff04ff02ffff04ffff05ff0580ff80808080ffff02ff14ffff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ffff02ffff03ff0bffff01ff02ffff01ff02ffff03ffff09ff05ffff05ff0b8080ffff01ff02ffff01ff0101ff0180ffff01ff02ffff01ff02ff2cffff04ff02ffff04ff05ffff04ffff06ff0b80ff8080808080ff018080ff0180ff0180ffff01ff02ffff01ff0180ff018080ff0180ff02ff38ffff04ff02ffff04ff0bffff04ffff0bffff0101ff0b80ffff04ffff02ff14ffff04ff02ffff04ff05ff80808080ff808080808080ffffff02ff38ffff04ff02ffff04ff05ffff04ffff02ff14ffff04ff02ffff04ff17ff80808080ffff04ffff0bffff0101ff0b80ff808080808080ffff02ff38ffff04ff02ffff04ff05ffff04ff17ffff04ffff02ff14ffff04ff02ffff04ff0bff80808080ffff04ffff0bffff0101ff0580ff80808080808080ff02ff38ffff04ff02ffff04ff05ffff04ffff0bffff0101ff5f80ffff04ffff0bffff0101ff2f80ffff04ffff0bffff0101ff1780ffff04ffff0bffff0101ff0b80ffff04ffff0bffff0101ff0580ff808080808080808080ffffff02ff38ffff04ff02ffff04ff05ffff04ff17ffff04ffff0bffff0101ff0b80ffff04ffff0bffff0101ff0580ff80808080808080ff02ff38ffff04ff02ffff04ff09ffff04ff0bffff04ffff02ff14ffff04ff02ffff04ff05ff80808080ff808080808080ffff02ff36ffff04ff02ffff04ff05ffff04ffff02ff38ffff04ff02ffff04ff0bffff04ffff0bffff0101ff8205ff80ffff04ffff0bffff0101ff8202ff80ffff04ffff0bffff0101ff82017f80ffff04ffff0bffff0101ff8200bf80ffff04ffff0bffff0101ff5f80ffff04ffff0bffff0101ff2f80ffff04ff17ffff04ffff0bffff0101ff0b80ff808080808080808080808080ff8080808080ff02ffff03ff820bffffff01ff02ffff01ff02ffff03ffff15ffff05ff8217ff80ffff018080ffff01ff02ffff01ff04ffff04ffff013effff04ffff05ff820bff80ffff01808080ffff04ffff04ffff013fffff04ffff0bffff02ff26ffff04ff02ffff04ff17ffff04ff2fffff04ffff02ff2affff04ff02ffff04ff0bffff04ffff05ff822fff80ffff04ffff05ff825fff80ff808080808080ff808080808080ffff02ff14ffff04ff02ffff04ffff04ff05ffff04ffff05ff8217ff80ffff04ff8300bfffffff04ffff05ff820bff80ffff018080808080ff8080808080ffff01808080ffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8200bfffff04ff82017fffff04ff8202ffffff04ff8205ffffff04ffff06ff820bff80ffff04ffff06ff8217ff80ffff04ffff06ff822fff80ffff04ffff06ff825fff80ffff04ff8300bfffffff04ffff10ffff05ff8217ff80ff83017fff80ffff04ff8302ffffffff04ff8305ffffffff04ffff02ffff03ffff02ff2cffff04ff02ffff04ffff05ff820bff80ffff04ff830bffffff8080808080ffff01ff02ffff01ff0880ff0180ffff01ff02ffff01ff04ffff05ff820bff80ff830bffff80ff018080ff0180ff8080808080808080808080808080808080808080808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff04ffff04ffff0133ffff04ffff02ff3affff04ff02ffff04ff8200bfffff04ff05ffff04ff8205ffffff04ffff02ffff03ff8300bfffffff01ff02ffff01ff10ff82017fff83017fff80ff0180ffff01ff02ffff0182017fff018080ff0180ffff04ffff10ff8202ffff83017fff80ff8080808080808080ffff04ff8305ffffffff04ffff04ff5fffff018080ffff018080808080ffff04ffff04ffff0149ffff04ff8305ffffffff01808080ffff02ffff03ff8202ffffff01ff02ffff01ff04ffff04ffff0152ffff04ffff0101ffff01808080ff8302ffff80ff0180ffff01ff02ffff018302ffffff018080ff01808080ff018080ff0180ff018080");
-pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a203655ccab4ab3329315abad49c3586");
+pub const DAO_PROPOSAL_HASH: [u8; 32] =
+    hex!("fe6d5c0373c1750598d137ce50b5b025a203655ccab4ab3329315abad49c3586");
 
 /// ```text
 /// (mod (
@@ -1532,22 +1548,22 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///   )
 ///   ; we need to track CAT_TYPE and DELEGATED_PUZZLE
 ///   ; list of (asset_type (parent amount))
-/// 
+///
 ///   ; If you're writing a proposal you'll want to use this layer
 ///   ; if you don't, your proposal might be invalidated if the p2_singleton coins get spent
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include utility_macros.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defun-inline calculate_singleton_puzzle_hash (PROPOSAL_SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f PROPOSAL_SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree PROPOSAL_SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun loop_through_list (
 ///       TREASURY_SINGLETON_STRUCT
 ///       SPEND_AMOUNT
@@ -1582,7 +1598,7 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun add_announcements_to_result (p2_calculated delegated_puzhash output)
 ///     (c
 ///       (list CREATE_PUZZLE_ANNOUNCEMENT (sha256tree (list p2_calculated delegated_puzhash)))
@@ -1592,7 +1608,7 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun sum_create_coins (conditions)
 ///     (if conditions
 ///         (+
@@ -1610,11 +1626,11 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///         0
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline calculate_delegated_puzzlehash (CONDITIONS)
 ///     (sha256tree (c ONE CONDITIONS))  ; this makes (q . CONDITIONS)
 ///   )
-/// 
+///
 ///   (defun wrap_in_cat_layer (CAT_MOD_HASH CAT_TAIL_HASH INNERPUZHASH)
 ///     (puzzle-hash-of-curried-function CAT_MOD_HASH
 ///       INNERPUZHASH
@@ -1622,7 +1638,7 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///       (sha256 ONE CAT_MOD_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun dedupe ((@ lst ((@ first (parent amount)) . rest)) ids)
 ///     (if lst
 ///         (let ((id (sha256 parent amount)))
@@ -1634,8 +1650,8 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///         ()
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   ; for a given asset type, loop through the cat coins and generate the announcements required for each
 ///   (defun for_each_asset (
 ///       TREASURY_SINGLETON_STRUCT
@@ -1680,7 +1696,7 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///         output
 ///     )
 ///   )
-/// 
+///
 ///   ; loops through the list of ((tailhash conditions))
 ///   (defun for_each_asset_type (
 ///       TREASURY_SINGLETON_STRUCT
@@ -1719,8 +1735,8 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///         output  ; at the end of the loop output our calculated conditions
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   ; main
 ///   (c
 ///     (list ASSERT_MY_PUZZLEHASH (calculate_singleton_puzzle_hash TREASURY_SINGLETON_STRUCT treasury_inner_puzhash))
@@ -1754,11 +1770,12 @@ pub const DAO_PROPOSAL_HASH: [u8; 32] = hex!("fe6d5c0373c1750598d137ce50b5b025a2
 ///       )
 ///     )
 ///   )
-/// 
+///
 /// )
 /// ```
 pub const DAO_SPEND_P2_SINGLETON: [u8; 2954] = hex!("ff02ffff01ff04ffff04ffff0148ffff04ffff02ff28ffff04ff02ffff04ffff05ff0580ffff04ff8202ffffff04ffff02ff14ffff04ff02ffff04ff05ff80808080ff808080808080ffff01808080ffff04ffff04ffff0133ffff04ff8202ffffff04ffff0101ffff04ffff04ffff05ffff06ff058080ffff018080ffff018080808080ffff02ffff03ff17ffff01ff02ffff01ff02ff3cffff04ff02ffff04ff05ffff04ffff02ff2affff04ff02ffff04ff17ff80808080ffff04ff5fffff04ffff02ffff03ff8200bfffff01ff02ffff01ff02ff38ffff04ff02ffff04ffff05ffff05ff8200bf8080ffff04ff5fffff04ffff05ffff06ffff05ff8200bf808080ff808080808080ff0180ffff01ff02ffff01ff0180ff018080ff0180ffff04ffff02ffff03ff8200bfffff01ff02ffff01ff06ff8200bf80ff0180ffff01ff02ffff01ff0180ff018080ff0180ffff04ffff02ffff03ff8200bfffff01ff02ffff01ff05ffff06ffff05ff8200bf808080ff0180ffff01ff02ffff01ff0180ff018080ff0180ffff04ffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff5fffff04ff2fffff04ff82017fffff04ff17ff808080808080808080ff80808080808080808080ff0180ffff01ff02ffff01ff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff5fffff04ff2fffff04ff82017fffff04ff17ff808080808080808080ff018080ff01808080ffff04ffff01ffffffff02ffff03ff05ffff01ff02ffff01ff02ff10ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ffff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff10ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ff02ffff03ffff22ffff09ffff0dff0580ffff012080ffff09ffff0dff0b80ffff012080ffff15ff17ffff0181ff8080ffff01ff02ffff01ff0bff05ff0bff1780ff0180ffff01ff02ffff01ff0880ff018080ff0180ffff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff14ffff04ff02ffff04ffff05ff0580ff80808080ffff02ff14ffff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ffff02ffff03ff0bffff01ff02ffff01ff03ffff09ff05ffff05ff0b8080ffff0101ffff02ff2cffff04ff02ffff04ff05ffff04ffff06ff0b80ff808080808080ff0180ffff01ff02ffff01ff0180ff018080ff0180ff04ffff04ffff013effff04ffff02ff14ffff04ff02ffff04ffff04ff2fffff04ffff02ff14ffff04ff02ffff01ff80808080ff808080ff80808080ff808080ffff04ffff04ffff013dffff04ffff0bff2fffff012480ff808080ffff02ffff03ff5fffff01ff02ffff01ff02ff3cffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ffff02ff38ffff04ff02ffff04ffff05ffff05ff5f8080ffff04ff17ffff04ffff05ffff06ffff05ff5f808080ff808080808080ffff04ffff06ff5f80ffff04ffff10ff8200bfffff05ffff06ffff05ff5f80808080ffff04ff82017fff80808080808080808080ff0180ffff01ff02ffff01ff02ffff03ffff15ffff11ff8200bfff0b80ffff018080ffff01ff02ffff01ff04ffff04ffff0133ffff04ff17ffff04ffff11ff8200bfff0b80ffff04ffff04ff17ffff018080ffff018080808080ff82017f80ff0180ffff01ff02ffff0182017fff018080ff0180ff018080ff01808080ffffff04ffff04ffff013effff04ffff02ff14ffff04ff02ffff04ffff04ff05ffff04ff0bff808080ff80808080ff808080ffff04ffff04ffff013dffff04ffff0bff05ffff012480ff808080ff178080ffff02ffff03ff05ffff01ff02ffff01ff10ffff02ffff03ffff09ffff05ffff05ff058080ffff013380ffff01ff02ffff01ff02ffff03ffff15ffff05ffff06ffff06ffff05ff0580808080ffff018080ffff01ff02ffff01ff05ffff06ffff06ffff05ff0580808080ff0180ffff01ff02ffff01ff0180ff018080ff0180ff0180ffff01ff02ffff01ff0180ff018080ff0180ffff02ff2affff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0180ff018080ff0180ff02ff28ffff04ff02ffff04ff05ffff04ff17ffff04ffff0bffff0101ff0b80ffff04ffff0bffff0101ff0580ff80808080808080ffff02ffff03ff05ffff01ff02ffff01ff02ffff03ffff02ff2cffff04ff02ffff04ffff0bff11ff2980ffff04ffff05ffff06ffff06ff01808080ff8080808080ffff01ff02ffff01ff02ff16ffff04ff02ffff04ffff06ffff05ffff06ff01808080ffff04ffff05ffff06ffff06ff01808080ff8080808080ff0180ffff01ff02ffff01ff04ffff05ffff05ffff06ff01808080ffff02ff16ffff04ff02ffff04ffff06ffff05ffff06ff01808080ffff04ffff04ffff0bff11ff2980ffff05ffff06ffff06ff0180808080ff808080808080ff018080ff0180ff0180ffff01ff02ffff01ff0180ff018080ff0180ffff02ffff03ff8200bfffff01ff02ffff01ff02ff12ffff04ff02ffff04ffff02ff38ffff04ff02ffff04ffff05ffff05ff8200bf8080ffff04ff5fffff04ffff05ffff06ffff05ff8200bf808080ff808080808080ffff04ffff02ffff03ffff06ff8200bf80ffff01ff02ffff01ff02ff14ffff04ff02ffff04ffff0180ff80808080ff0180ffff01ff02ffff01ff02ff14ffff04ff02ffff04ffff04ffff0101ffff02ffff03ffff15ffff11ffff10ff82017fffff05ffff06ffff05ff8200bf80808080ff8202ff80ffff018080ffff01ff02ffff01ff04ffff04ffff0133ffff04ffff05ffff06ffff06ffff06ffff06ff018080808080ffff04ffff11ffff10ff82017fffff05ffff06ffff05ff8200bf80808080ff8202ff80ffff04ffff04ffff05ffff06ffff06ffff06ffff06ff018080808080ffff018080ffff018080808080ffff05ffff06ffff06ffff06ff018080808080ff0180ffff01ff02ffff01ff05ffff06ffff06ffff06ff0180808080ff018080ff018080ff80808080ff018080ff0180ffff04ffff02ff2effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ffff06ff8200bf80ffff04ffff10ff82017fffff05ffff06ffff05ff8200bf80808080ffff04ff8202ffffff04ff8205ffff808080808080808080808080ff808080808080ff0180ffff01ff02ffff018205ffff018080ff0180ff02ffff03ff2fffff01ff02ffff01ff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ffff06ff2f80ffff04ffff06ff5f80ffff04ffff02ff2effff04ff02ffff04ff05ffff04ff0bffff04ffff02ffff03ffff09ffff05ffff05ff2f8080ffff05ffff05ff5f808080ffff01ff02ffff01ff05ffff06ffff05ff2f808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ffff04ff17ffff04ffff02ff3affff04ff02ffff04ff0bffff04ffff05ffff05ff5f8080ffff04ff17ff808080808080ffff04ffff02ff16ffff04ff02ffff04ffff05ffff06ffff05ff5f808080ffff04ffff0180ffff04ffff0180ff808080808080ffff04ffff0180ffff04ffff02ff2affff04ff02ffff04ffff05ffff06ffff05ff2f808080ff80808080ffff04ff8200bfff808080808080808080808080ff808080808080808080ff0180ffff01ff02ffff018200bfff018080ff0180ff018080");
-pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] = hex!("7bc8942159e600f56a87e1d9c059c8705307ec2fb996a949503298dedfed00be");
+pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] =
+    hex!("7bc8942159e600f56a87e1d9c059c8705307ec2fb996a949503298dedfed00be");
 
 /// ```text
 /// (mod
@@ -1781,7 +1798,7 @@ pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] = hex!("7bc8942159e600f56a87e1d9
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defun-inline recreate_self (
 ///       TREASURY_MOD_HASH
 ///       PROPOSAL_VALIDATOR
@@ -1803,14 +1820,14 @@ pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] = hex!("7bc8942159e600f56a87e1d9
 ///       (sha256 ONE TREASURY_MOD_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun calculate_singleton_puzzle_hash (SINGLETON_STRUCT inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function (f SINGLETON_STRUCT)
 ///       inner_puzzle_hash
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun stager (ORACLE_SPEND_DELAY my_inner_puzhash singleton_struct)
 ///     (c
 ///       (if singleton_struct
@@ -1829,7 +1846,7 @@ pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] = hex!("7bc8942159e600f56a87e1d9
 ///       (list (list CREATE_COIN my_inner_puzhash ONE))
 ///     )
 ///   )
-/// 
+///
 ///   (c
 ///     (list CREATE_PUZZLE_ANNOUNCEMENT 0)  ; the arguments are secured implicitly in the puzzle of the treasury
 ///     (if delegated_puzzle_reveal
@@ -1839,7 +1856,7 @@ pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] = hex!("7bc8942159e600f56a87e1d9
 ///             ; If the update case then the validator returns the new treasury create coin
 ///             ; If the spend case then we need to recreate the treasury outselves
 ///             ; treasury specific conditions
-/// 
+///
 ///             (c
 ///               (list ASSERT_COIN_ANNOUNCEMENT (sha256 announcement_source (sha256tree (list delegated_puzzle_hash announcement_args))))  ; announcement source is validated inside the ProposalValidator
 ///               (c
@@ -1878,7 +1895,8 @@ pub const DAO_SPEND_P2_SINGLETON_HASH: [u8; 32] = hex!("7bc8942159e600f56a87e1d9
 /// )
 /// ```
 pub const DAO_TREASURY: [u8; 1200] = hex!("ff02ffff01ff04ffff04ffff013effff04ffff0180ffff01808080ffff02ffff03ff8217ffffff01ff02ffff01ff02ffff03ffff09ffff02ff0affff04ff02ffff04ff8217ffff80808080ff8215ff80ffff01ff02ffff01ff04ffff04ffff013dffff04ffff0bff8209ffffff02ff0affff04ff02ffff04ffff04ff8215ffffff04ff822dffffff01808080ff8080808080ffff01808080ffff04ffff04ffff0152ffff04ffff0101ffff01808080ffff02ff0bffff04ff5fffff04ff8200bfffff04ff8205ffffff04ff820bffffff04ffff02ff8217ffff822fff80ffff01808080808080808080ff0180ffff01ff02ffff01ff0880ff018080ff0180ff0180ffff01ff02ffff01ff02ff1effff04ff02ffff04ff8202ffffff04ffff02ff14ffff04ff02ffff04ff05ffff04ffff0bffff0101ff8202ff80ffff04ffff0bffff0101ff82017f80ffff04ffff0bffff0101ff8200bf80ffff04ffff0bffff0101ff5f80ffff04ffff0bffff0101ff2f80ffff04ffff0bffff0101ff1780ffff04ffff02ff0affff04ff02ffff04ff0bff80808080ffff04ffff0bffff0101ff0580ff808080808080808080808080ffff04ff825fffff808080808080ff018080ff018080ffff04ffff01ffffff02ffff03ff05ffff01ff02ffff01ff02ff08ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ffff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff08ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ff02ffff03ffff22ffff09ffff0dff0580ffff012080ffff09ffff0dff0b80ffff012080ffff15ff17ffff0181ff8080ffff01ff02ffff01ff0bff05ff0bff1780ff0180ffff01ff02ffff01ff0880ff018080ff0180ffff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff0affff04ff02ffff04ffff05ff0580ff80808080ffff02ff0affff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ffff02ff14ffff04ff02ffff04ff09ffff04ff0bffff04ffff02ff0affff04ff02ffff04ff05ff80808080ff808080808080ff04ffff02ffff03ff17ffff01ff02ffff01ff04ffff0146ffff04ffff02ff1cffff04ff02ffff04ffff05ffff06ff178080ffff04ffff02ff16ffff04ff02ffff04ff17ffff04ff0bff8080808080ffff04ffff0101ff808080808080ffff01808080ff0180ffff01ff02ffff01ff04ffff0152ffff04ff05ffff01808080ff018080ff0180ffff04ffff04ffff0133ffff04ff0bffff01ff01808080ff808080ff018080");
-pub const DAO_TREASURY_HASH: [u8; 32] = hex!("637d78acd395b6bb03211bcfc5f5f2e878cba2d62b2f53871d49a8b928411b19");
+pub const DAO_TREASURY_HASH: [u8; 32] =
+    hex!("637d78acd395b6bb03211bcfc5f5f2e878cba2d62b2f53871d49a8b928411b19");
 
 /// ```text
 /// (mod
@@ -1897,13 +1915,13 @@ pub const DAO_TREASURY_HASH: [u8; 32] = hex!("637d78acd395b6bb03211bcfc5f5f2e878
 ///     ORACLE_SPEND_DELAY
 ///   )
 ///   ;; This is a proposal to update treasury conditions for a DAO
-/// 
-/// 
+///
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (list
 ///     (list CREATE_COIN
 ///       (puzzle-hash-of-curried-function TREASURY_MOD_HASH
@@ -1927,14 +1945,15 @@ pub const DAO_TREASURY_HASH: [u8; 32] = hex!("637d78acd395b6bb03211bcfc5f5f2e878
 /// )
 /// ```
 pub const DAO_UPDATE_PROPOSAL: [u8; 705] = hex!("ff02ffff01ff04ffff04ffff0133ffff04ffff02ff0affff04ff02ffff04ff05ffff04ffff0bffff0101ff822fff80ffff04ffff0bffff0101ff8217ff80ffff04ffff0bffff0101ff820bff80ffff04ffff0bffff0101ff8205ff80ffff04ffff0bffff0101ff8202ff80ffff04ffff0bffff0101ff82017f80ffff04ffff02ff0affff04ff02ffff04ff0bffff04ffff0bffff0101ff8200bf80ffff04ffff0bffff0101ff5f80ffff04ffff0bffff0101ff2f80ffff04ffff02ff0effff04ff02ffff04ff17ff80808080ff8080808080808080ffff04ffff0bffff0101ff0580ff808080808080808080808080ffff04ffff0101ffff0180808080ffff018080ffff04ffff01ffff02ffff03ff05ffff01ff02ffff01ff02ff04ffff04ff02ffff04ffff06ff0580ffff04ffff0bffff0102ffff0bffff0101ffff010480ffff0bffff0102ffff0bffff0102ffff0bffff0101ffff010180ffff05ff058080ffff0bffff0102ff0bffff0bffff0101ffff018080808080ff8080808080ff0180ffff01ff02ffff010bff018080ff0180ffff0bffff0102ffff01a0a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222ffff0bffff0102ffff0bffff0102ffff01a09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ff0580ffff0bffff0102ffff02ff04ffff04ff02ffff04ff07ffff01ffa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b280808080ffff01a04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a808080ff02ffff03ffff07ff0580ffff01ff02ffff01ff0bffff0102ffff02ff0effff04ff02ffff04ffff05ff0580ff80808080ffff02ff0effff04ff02ffff04ffff06ff0580ff8080808080ff0180ffff01ff02ffff01ff0bffff0101ff0580ff018080ff0180ff018080");
-pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] = hex!("fc032384cfece9b542c3e1ea77ba119fb1013a3d74b622302c0b670447e4343d");
+pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] =
+    hex!("fc032384cfece9b542c3e1ea77ba119fb1013a3d74b622302c0b670447e4343d");
 
 /// ```text
 /// ; The DID innerpuzzle is designed to sit inside the singleton layer and provide functionality related to being an identity.
 /// ; At the moment the two pieces of functionality are recovery and message creation.
 /// ; A DID's ID is it's Singleton ID
 /// ; Recovery is based around having a list of known other DIDs which can send messages approving you change the innerpuzzle of your DID singleton
-/// 
+///
 /// (mod
 ///   (
 ///     INNER_PUZZLE  ; Standard P2 inner puzzle, used to record the ownership of the DID.
@@ -1952,13 +1971,13 @@ pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] = hex!("fc032384cfece9b542c3e1ea77b
 ///     my_id  ; my coin ID
 ///   )
 ///   ;message is the new puzzle in the recovery and standard spend cases
-/// 
+///
 ///   ;MOD_HASH, MY_PUBKEY, RECOVERY_DID_LIST_HASH are curried into the puzzle
 ///   ;EXAMPLE SOLUTION (0xcafef00d 0x12341234 0x923bf9a7856b19d335a65f12d68957d497e1f0c16c0e14baf6d120e60753a1ce 2 1 100 (q "source code") 0xdeadbeef 0xcafef00d ((0xdadadada 0xdad5dad5 200) () (0xfafafafa 0xfaf5faf5 200)) 0xfadeddab (0x22222222 0x33333333 0x44444444))
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   ; takes a lisp tree and returns the hash of it
 ///   (defun sha256tree1 (TREE)
 ///     (if (l TREE)
@@ -1966,23 +1985,23 @@ pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] = hex!("fc032384cfece9b542c3e1ea77b
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   ; recovery message module - gets values curried in to make the puzzle
 ///   (defun make_message_puzzle (recovering_coin newpuz pubkey)
 ///     (qq (q . (((unquote CREATE_COIN_ANNOUNCEMENT) (unquote recovering_coin)) ((unquote AGG_SIG_UNSAFE) (unquote pubkey) (unquote newpuz)))))
 ///   )
-/// 
+///
 ///   ; this function creates the assert announcement for each message coin approving a recovery
 ///   (defun-inline create_consume_message (coin_id my_id new_innerpuz pubkey)
 ///     (list ASSERT_COIN_ANNOUNCEMENT (sha256 (sha256 coin_id (sha256tree1 (make_message_puzzle my_id new_innerpuz pubkey))) my_id))
 ///   )
-/// 
+///
 ///   ; this function calculates a coin ID given the inner puzzle and singleton information
 ///   (defun create_coin_ID_for_recovery (SINGLETON_STRUCT launcher_id parent innerpuzhash amount)
 ///     (sha256 parent (calculate_full_puzzle_hash (c (f SINGLETON_STRUCT) (c launcher_id (r (r SINGLETON_STRUCT)))) innerpuzhash) amount)
 ///   )
-/// 
-/// 
+///
+///
 ///   ; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_STRUCT inner_puzzle_hash)
@@ -1991,11 +2010,11 @@ pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] = hex!("fc032384cfece9b542c3e1ea77b
 ///       (sha256tree1 SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   ; this loops over our identities to check list, and checks if we have been given parent information for this identity
 ///   ; the reason for this is because we might only require 3/5 of the IDs give approval messages for a recovery
 ///   ; if we have the information for an identity then we create a consume message using that information
-/// 
+///
 ///   (defun check_messages_from_identities (SINGLETON_STRUCT num_verifications_required identities my_id  new_puz parent_innerpuzhash_amounts_for_recovery_ids pubkey num_verifications)
 ///     (if identities
 ///         (if (f parent_innerpuzhash_amounts_for_recovery_ids)
@@ -2042,16 +2061,16 @@ pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] = hex!("fc032384cfece9b542c3e1ea77b
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   ;Spend modes:
 ///   ;0 = recovery
 ///   ;1 = run the INNER_PUZZLE
-/// 
+///
 ///   ;MAIN
 ///   (if mode
 ///       ; mode 1 - run INNER_PUZZLE
 ///       (a INNER_PUZZLE my_amount_or_inner_solution)
-/// 
+///
 ///       ; mode 0 - recovery
 ///       (if (all (= (sha256tree1 recovery_list_reveal) RECOVERY_DID_LIST_HASH) (> NUM_VERIFICATIONS_REQUIRED 0))
 ///           (c (list ASSERT_MY_AMOUNT my_amount_or_inner_solution)
@@ -2067,7 +2086,8 @@ pub const DAO_UPDATE_PROPOSAL_HASH: [u8; 32] = hex!("fc032384cfece9b542c3e1ea77b
 /// )
 /// ```
 pub const DID_INNERPUZ: [u8; 1012] = hex!("ff02ffff01ff02ffff03ff81bfffff01ff02ff05ff82017f80ffff01ff02ffff03ffff22ffff09ffff02ff7effff04ff02ffff04ff8217ffff80808080ff0b80ffff15ff17ff808080ffff01ff04ffff04ff28ffff04ff82017fff808080ffff04ffff04ff34ffff04ff8202ffffff04ff82017fffff04ffff04ff8202ffff8080ff8080808080ffff04ffff04ff38ffff04ff822fffff808080ffff02ff26ffff04ff02ffff04ff2fffff04ff17ffff04ff8217ffffff04ff822fffffff04ff8202ffffff04ff8205ffffff04ff820bffffff01ff8080808080808080808080808080ffff01ff088080ff018080ff0180ffff04ffff01ffffffff313dff4946ffff0233ff3c04ffffff0101ff02ff02ffff03ff05ffff01ff02ff3affff04ff02ffff04ff0dffff04ffff0bff2affff0bff22ff3c80ffff0bff2affff0bff2affff0bff22ff3280ff0980ffff0bff2aff0bffff0bff22ff8080808080ff8080808080ffff010b80ff0180ffffff02ffff03ff17ffff01ff02ffff03ff82013fffff01ff04ffff04ff30ffff04ffff0bffff0bffff02ff36ffff04ff02ffff04ff05ffff04ff27ffff04ff82023fffff04ff82053fffff04ff820b3fff8080808080808080ffff02ff7effff04ff02ffff04ffff02ff2effff04ff02ffff04ff2fffff04ff5fffff04ff82017fff808080808080ff8080808080ff2f80ff808080ffff02ff26ffff04ff02ffff04ff05ffff04ff0bffff04ff37ffff04ff2fffff04ff5fffff04ff8201bfffff04ff82017fffff04ffff10ff8202ffffff010180ff808080808080808080808080ffff01ff02ff26ffff04ff02ffff04ff05ffff04ff37ffff04ff2fffff04ff5fffff04ff8201bfffff04ff82017fffff04ff8202ffff8080808080808080808080ff0180ffff01ff02ffff03ffff15ff8202ffffff11ff0bffff01018080ffff01ff04ffff04ff20ffff04ff82017fffff04ff5fff80808080ff8080ffff01ff088080ff018080ff0180ff0bff17ffff02ff5effff04ff02ffff04ff09ffff04ff2fffff04ffff02ff7effff04ff02ffff04ffff04ff09ffff04ff0bff1d8080ff80808080ff808080808080ff5f80ffff04ffff0101ffff04ffff04ff2cffff04ff05ff808080ffff04ffff04ff20ffff04ff17ffff04ff0bff80808080ff80808080ffff0bff2affff0bff22ff2480ffff0bff2affff0bff2affff0bff22ff3280ff0580ffff0bff2affff02ff3affff04ff02ffff04ff07ffff04ffff0bff22ff2280ff8080808080ffff0bff22ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff7effff04ff02ffff04ff09ff80808080ffff02ff7effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const DID_INNERPUZ_HASH: [u8; 32] = hex!("33143d2bef64f14036742673afd158126b94284b4530a28c354fac202b0c910e");
+pub const DID_INNERPUZ_HASH: [u8; 32] =
+    hex!("33143d2bef64f14036742673afd158126b94284b4530a28c354fac202b0c910e");
 
 /// ```text
 /// (mod (LAUNCHER_PH MINT_NUMBER MINT_TOTAL)
@@ -2078,7 +2098,8 @@ pub const DID_INNERPUZ_HASH: [u8; 32] = hex!("33143d2bef64f14036742673afd158126b
 /// )
 /// ```
 pub const CREATE_NFT_LAUNCHER_FROM_DID: [u8; 65] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff01ff01808080ffff04ffff04ff06ffff04ffff0bff0bff1780ff808080ff808080ffff04ffff01ff333cff018080");
-pub const CREATE_NFT_LAUNCHER_FROM_DID_HASH: [u8; 32] = hex!("7a32d2d9571d3436791c0ad3d7fcfdb9c43ace2b0f0ff13f98d29f0cc093f445");
+pub const CREATE_NFT_LAUNCHER_FROM_DID_HASH: [u8; 32] =
+    hex!("7a32d2d9571d3436791c0ad3d7fcfdb9c43ace2b0f0ff13f98d29f0cc093f445");
 
 /// ```text
 /// (mod (LAUNCHER_PH MINT_NUMBER MINT_TOTAL)
@@ -2089,14 +2110,15 @@ pub const CREATE_NFT_LAUNCHER_FROM_DID_HASH: [u8; 32] = hex!("7a32d2d9571d343679
 /// )
 /// ```
 pub const NFT_INTERMEDIATE_LAUNCHER: [u8; 65] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff01ff01808080ffff04ffff04ff06ffff04ffff0bff0bff1780ff808080ff808080ffff04ffff01ff333cff018080");
-pub const NFT_INTERMEDIATE_LAUNCHER_HASH: [u8; 32] = hex!("7a32d2d9571d3436791c0ad3d7fcfdb9c43ace2b0f0ff13f98d29f0cc093f445");
+pub const NFT_INTERMEDIATE_LAUNCHER_HASH: [u8; 32] =
+    hex!("7a32d2d9571d3436791c0ad3d7fcfdb9c43ace2b0f0ff13f98d29f0cc093f445");
 
 /// ```text
 /// (mod (CURRENT_METADATA METADATA_UPDATER_PUZZLE_HASH (key . new_url))
-/// 
+///
 ///   ; METADATA and METADATA_UPDATER_PUZZLE_HASH are passed in as truths from the layer above
 ///   ; This program returns ((new_metadata new_metadata_updater_puzhash) conditions)
-/// 
+///
 ///   ; Add uri to a field
 ///   (defun add_url (METADATA key new_url)
 ///     (if METADATA
@@ -2124,18 +2146,19 @@ pub const NFT_INTERMEDIATE_LAUNCHER_HASH: [u8; 32] = hex!("7a32d2d9571d3436791c0
 /// )
 /// ```
 pub const NFT_METADATA_UPDATER_DEFAULT: [u8; 241] = hex!("ff02ffff01ff04ffff04ffff02ffff03ffff22ff27ff3780ffff01ff02ffff03ffff21ffff09ff27ffff01826d7580ffff09ff27ffff01826c7580ffff09ff27ffff01758080ffff01ff02ff02ffff04ff02ffff04ff05ffff04ff27ffff04ff37ff808080808080ffff010580ff0180ffff010580ff0180ffff04ff0bff808080ffff01ff808080ffff04ffff01ff02ffff03ff05ffff01ff02ffff03ffff09ff11ff0b80ffff01ff04ffff04ff0bffff04ff17ff198080ff0d80ffff01ff04ff09ffff02ff02ffff04ff02ffff04ff0dffff04ff0bffff04ff17ff8080808080808080ff0180ff8080ff0180ff018080");
-pub const NFT_METADATA_UPDATER_DEFAULT_HASH: [u8; 32] = hex!("fe8a4b4e27a2e29a4d3fc7ce9d527adbcaccbab6ada3903ccf3ba9a769d2d78b");
+pub const NFT_METADATA_UPDATER_DEFAULT_HASH: [u8; 32] =
+    hex!("fe8a4b4e27a2e29a4d3fc7ce9d527adbcaccbab6ada3903ccf3ba9a769d2d78b");
 
 /// ```text
 /// (mod (CURRENT_METADATA METADATA_UPDATER_PUZZLE_HASH solution)
-/// 
+///
 ///   ; solution is (new_url new_metadata_updater_puzhash)
-/// 
+///
 ///   ; METADATA and METADATA_UPDATER_PUZZLE_HASH are passed in as truths from the layer above
 ///   ; This program returns ((new_metadata new_metadata_updater_puzhash) conditions)
-/// 
+///
 ///   ; NOTE THIS PROGRAM IS FOR TESTING ONLY - USE IN DEPLOYMENT AT YOUR OWN PERIL
-/// 
+///
 ///   ; once we find 'u' we don't need to continue looping
 ///   (defun add_url (METADATA new_url)
 ///     (if METADATA
@@ -2146,18 +2169,19 @@ pub const NFT_METADATA_UPDATER_DEFAULT_HASH: [u8; 32] = hex!("fe8a4b4e27a2e29a4d
 ///         ()
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline assert_bytes32 (value)
 ///     (= (strlen value) 32)
 ///   )
-/// 
+///
 ///   ; main
 ///   ; returns ((new_metadata new_metadata_updater_puzhash) conditions)
 ///   (list (list (if (f solution) (add_url CURRENT_METADATA (f solution)) CURRENT_METADATA) (if (assert_bytes32 (f (r solution))) (f (r solution)) METADATA_UPDATER_PUZZLE_HASH)) 0)
 /// )
 /// ```
 pub const NFT_METADATA_UPDATER_UPDATEABLE: [u8; 203] = hex!("ff02ffff01ff04ffff04ffff02ffff03ff27ffff01ff02ff02ffff04ff02ffff04ff05ffff04ff27ff8080808080ffff010580ff0180ffff04ffff02ffff03ffff09ffff0dff5780ffff012080ffff0157ffff010b80ff0180ff808080ffff01ff808080ffff04ffff01ff02ffff03ff05ffff01ff02ffff03ffff09ff11ffff017580ffff01ff04ffff04ffff0175ffff04ff0bff198080ff0d80ffff01ff04ff09ffff02ff02ffff04ff02ffff04ff0dffff04ff0bff80808080808080ff0180ff8080ff0180ff018080");
-pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c06b78ab38636e9624f2f8da73be9b36e0ce17c8d8ef3bad9f");
+pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] =
+    hex!("0b1ffba1601777c06b78ab38636e9624f2f8da73be9b36e0ce17c8d8ef3bad9f");
 
 /// ```text
 /// (mod (
@@ -2167,14 +2191,14 @@ pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c
 ///     INNER_PUZZLE
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defconstant NEW_OWNER_CONDITION -10)
 ///   (defconstant ANNOUNCEMENT_PREFIX 0xad4c)  ; first 2 bytes of (sha256 "Ownership Layer")
-/// 
+///
 ///   (defun-inline nft_ownership_layer_puzzle_hash (NFT_OWNERSHIP_LAYER_MOD_HASH new_owner TRANSFER_PROGRAM inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function NFT_OWNERSHIP_LAYER_MOD_HASH
 ///       inner_puzzle_hash
@@ -2183,7 +2207,7 @@ pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c
 ///       (sha256 ONE NFT_OWNERSHIP_LAYER_MOD_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun construct_end_conditions (NFT_OWNERSHIP_LAYER_MOD_HASH TRANSFER_PROGRAM odd_args (new_owner new_tp conditions))
 ///     (c
 ///       (c
@@ -2196,7 +2220,7 @@ pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c
 ///       conditions
 ///     )
 ///   )
-/// 
+///
 ///   (defun wrap_odd_create_coins (NFT_OWNERSHIP_LAYER_MOD_HASH TRANSFER_PROGRAM CURRENT_OWNER all_conditions conditions odd_args tp_output)
 ///     (if conditions
 ///         (if (= (f (f conditions)) CREATE_COIN)
@@ -2235,7 +2259,7 @@ pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   (defun main (
 ///       NFT_OWNERSHIP_LAYER_MOD_HASH
 ///       TRANSFER_PROGRAM
@@ -2251,7 +2275,7 @@ pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c
 ///       () ()
 ///     )
 ///   )
-/// 
+///
 ///   ; main
 ///   (main
 ///     NFT_OWNERSHIP_LAYER_MOD_HASH
@@ -2262,7 +2286,8 @@ pub const NFT_METADATA_UPDATER_UPDATEABLE_HASH: [u8; 32] = hex!("0b1ffba1601777c
 /// )
 /// ```
 pub const NFT_OWNERSHIP_LAYER: [u8; 1226] = hex!("ff02ffff01ff02ff26ffff04ff02ffff04ff05ffff04ff17ffff04ff0bffff04ffff02ff2fff5f80ff80808080808080ffff04ffff01ffffff82ad4cff0233ffff3e04ff81f601ffffff0102ffff02ffff03ff05ffff01ff02ff2affff04ff02ffff04ff0dffff04ffff0bff32ffff0bff3cff3480ffff0bff32ffff0bff32ffff0bff3cff2280ff0980ffff0bff32ff0bffff0bff3cff8080808080ff8080808080ffff010b80ff0180ff04ffff04ff38ffff04ffff02ff36ffff04ff02ffff04ff05ffff04ff27ffff04ffff02ff2effff04ff02ffff04ffff02ffff03ff81afffff0181afffff010b80ff0180ff80808080ffff04ffff0bff3cff4f80ffff04ffff0bff3cff0580ff8080808080808080ff378080ff82016f80ffffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff2fffff01ff80ff808080808080808080ff0bff32ffff0bff3cff2880ffff0bff32ffff0bff32ffff0bff3cff2280ff0580ffff0bff32ffff02ff2affff04ff02ffff04ff07ffff04ffff0bff3cff3c80ff8080808080ffff0bff3cff8080808080ffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff2effff04ff02ffff04ff09ff80808080ffff02ff2effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ffff03ff5fffff01ff02ffff03ffff09ff82011fff3880ffff01ff02ffff03ffff09ffff18ff82059f80ff3c80ffff01ff02ffff03ffff20ff81bf80ffff01ff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff81dfffff04ff82019fffff04ff82017fff80808080808080808080ffff01ff088080ff0180ffff01ff04ff819fffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff81dfffff04ff81bfffff04ff82017fff808080808080808080808080ff0180ffff01ff02ffff03ffff09ff82011fff2c80ffff01ff02ffff03ffff20ff82017f80ffff01ff04ffff04ff24ffff04ffff0eff10ffff02ff2effff04ff02ffff04ff82019fff8080808080ff808080ffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff81dfffff04ff81bfffff04ffff02ff0bffff04ff17ffff04ff2fffff04ff82019fff8080808080ff8080808080808080808080ffff01ff088080ff0180ffff01ff02ffff03ffff09ff82011fff2480ffff01ff02ffff03ffff20ffff02ffff03ffff09ffff0122ffff0dff82029f8080ffff01ff02ffff03ffff09ffff0cff82029fff80ffff010280ff1080ffff01ff0101ff8080ff0180ff8080ff018080ffff01ff04ff819fffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff81dfffff04ff81bfffff04ff82017fff8080808080808080808080ffff01ff088080ff0180ffff01ff04ff819fffff02ff3effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff81dfffff04ff81bfffff04ff82017fff808080808080808080808080ff018080ff018080ff0180ffff01ff02ff3affff04ff02ffff04ff05ffff04ff0bffff04ff81bfffff04ffff02ffff03ff82017fffff0182017fffff01ff02ff0bffff04ff17ffff04ff2fffff01ff808080808080ff0180ff8080808080808080ff0180ff018080");
-pub const NFT_OWNERSHIP_LAYER_HASH: [u8; 32] = hex!("c5abea79afaa001b5427dfa0c8cf42ca6f38f5841b78f9b3c252733eb2de2726");
+pub const NFT_OWNERSHIP_LAYER_HASH: [u8; 32] =
+    hex!("c5abea79afaa001b5427dfa0c8cf42ca6f38f5841b78f9b3c252733eb2de2726");
 
 /// ```text
 /// (mod
@@ -2274,14 +2299,14 @@ pub const NFT_OWNERSHIP_LAYER_HASH: [u8; 32] = hex!("c5abea79afaa001b5427dfa0c8c
 ///     conditions  ; Truth
 ///     solution  ; created from the NFT's inner puzzle - solution is (new_owner trade_prices_list new_did_inner_hash)
 ///   )
-/// 
+///
 ///   ; This is a transfer program - which must return (new_owner, Optional[new_transfer_program], conditions)
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   (defconstant TEN_THOUSAND 10000)
-/// 
+///
 ///   ;; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_STRUCT inner_puzzle_hash)
@@ -2290,16 +2315,16 @@ pub const NFT_OWNERSHIP_LAYER_HASH: [u8; 32] = hex!("c5abea79afaa001b5427dfa0c8c
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   ; Given a singleton ID, generate the singleton struct
 ///   (defun-inline get_singleton_struct (SINGLETON_STRUCT singleton_id)
 ///     (c (f SINGLETON_STRUCT) (c singleton_id (r (r SINGLETON_STRUCT))))
 ///   )
-/// 
+///
 ///   (defun-inline calculate_percentage (amount percentage)
 ///     (f (divmod (* amount percentage) TEN_THOUSAND))
 ///   )
-/// 
+///
 ///   ; Loop of the trade prices list and either assert a puzzle announcement or generate xch
 ///   (defun parse_trade_prices_list (ROYALTY_ADDRESS TRADE_PRICE_PERCENTAGE trade_prices_list my_nft_id)
 ///     (if trade_prices_list
@@ -2316,7 +2341,7 @@ pub const NFT_OWNERSHIP_LAYER_HASH: [u8; 32] = hex!("c5abea79afaa001b5427dfa0c8c
 ///         ()
 ///     )
 ///   )
-/// 
+///
 ///   ; main
 ///   ; Returning (new_owner new_transfer_program conditions)
 ///   ; solution is (new_owner trade_prices_list new_did_inner_hash)
@@ -2340,12 +2365,13 @@ pub const NFT_OWNERSHIP_LAYER_HASH: [u8; 32] = hex!("c5abea79afaa001b5427dfa0c8c
 ///       )
 ///       (list Current_Owner () ())
 ///   )
-/// 
-/// 
+///
+///
 /// )
 /// ```
 pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES: [u8; 687] = hex!("ff02ffff01ff02ffff03ff81bfffff01ff04ff82013fffff04ff80ffff04ffff02ffff03ffff22ff82013fffff20ffff09ff82013fff2f808080ffff01ff04ffff04ff10ffff04ffff0bffff02ff2effff04ff02ffff04ff09ffff04ff8205bfffff04ffff02ff3effff04ff02ffff04ffff04ff09ffff04ff82013fff1d8080ff80808080ff808080808080ff1580ff808080ffff02ff16ffff04ff02ffff04ff0bffff04ff17ffff04ff8202bfffff04ff15ff8080808080808080ffff01ff02ff16ffff04ff02ffff04ff0bffff04ff17ffff04ff8202bfffff04ff15ff8080808080808080ff0180ff80808080ffff01ff04ff2fffff01ff80ff80808080ff0180ffff04ffff01ffffff3f02ff04ff0101ffff822710ff02ff02ffff03ff05ffff01ff02ff3affff04ff02ffff04ff0dffff04ffff0bff2affff0bff2cff1480ffff0bff2affff0bff2affff0bff2cff3c80ff0980ffff0bff2aff0bffff0bff2cff8080808080ff8080808080ffff010b80ff0180ffff02ffff03ff17ffff01ff04ffff04ff10ffff04ffff0bff81a7ffff02ff3effff04ff02ffff04ffff04ff2fffff04ffff04ff05ffff04ffff05ffff14ffff12ff47ff0b80ff128080ffff04ffff04ff05ff8080ff80808080ff808080ff8080808080ff808080ffff02ff16ffff04ff02ffff04ff05ffff04ff0bffff04ff37ffff04ff2fff8080808080808080ff8080ff0180ffff0bff2affff0bff2cff1880ffff0bff2affff0bff2affff0bff2cff3c80ff0580ffff0bff2affff02ff3affff04ff02ffff04ff07ffff04ffff0bff2cff2c80ff8080808080ffff0bff2cff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff3effff04ff02ffff04ff09ff80808080ffff02ff3effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES_HASH: [u8; 32] = hex!("025dee0fb1e9fa110302a7e9bfb6e381ca09618e2778b0184fa5c6b275cfce1f");
+pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES_HASH: [u8; 32] =
+    hex!("025dee0fb1e9fa110302a7e9bfb6e381ca09618e2778b0184fa5c6b275cfce1f");
 
 /// ```text
 /// (mod (
@@ -2355,11 +2381,11 @@ pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES_HASH: [u8;
 ///     INNER_PUZZLE
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defun-inline nft_state_layer_puzzle_hash (NFT_STATE_LAYER_MOD_HASH METADATA METADATA_UPDATER_PUZZLE_HASH inner_puzzle_hash)
 ///     (puzzle-hash-of-curried-function NFT_STATE_LAYER_MOD_HASH
 ///       inner_puzzle_hash
@@ -2368,8 +2394,8 @@ pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES_HASH: [u8;
 ///       (sha256 ONE NFT_STATE_LAYER_MOD_HASH)
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   ; this function does two things - it wraps the odd value create coins, and it also filters out all negative conditions
 ///   ; odd_coin_params is (puzhash amount ...)
 ///   ; new_metadata_info is ((METADATA METADATA_UPDATER_PUZZLE_HASH) conditions)
@@ -2412,7 +2438,7 @@ pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES_HASH: [u8;
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   ; main
 ///   (wrap_odd_create_coins
 ///     NFT_STATE_LAYER_MOD_HASH
@@ -2424,7 +2450,8 @@ pub const NFT_OWNERSHIP_TRANSFER_PROGRAM_ONE_WAY_CLAIM_WITH_ROYALTIES_HASH: [u8;
 /// )
 /// ```
 pub const NFT_STATE_LAYER: [u8; 827] = hex!("ff02ffff01ff02ff3effff04ff02ffff04ff05ffff04ffff02ff2fff5f80ffff04ff80ffff04ffff04ffff04ff0bffff04ff17ff808080ffff01ff808080ffff01ff8080808080808080ffff04ffff01ffffff0233ff04ff0101ffff02ff02ffff03ff05ffff01ff02ff1affff04ff02ffff04ff0dffff04ffff0bff12ffff0bff2cff1480ffff0bff12ffff0bff12ffff0bff2cff3c80ff0980ffff0bff12ff0bffff0bff2cff8080808080ff8080808080ffff010b80ff0180ffff0bff12ffff0bff2cff1080ffff0bff12ffff0bff12ffff0bff2cff3c80ff0580ffff0bff12ffff02ff1affff04ff02ffff04ff07ffff04ffff0bff2cff2c80ff8080808080ffff0bff2cff8080808080ffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff2effff04ff02ffff04ff09ff80808080ffff02ff2effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ffff03ff0bffff01ff02ffff03ffff09ff23ff1880ffff01ff02ffff03ffff18ff81b3ff2c80ffff01ff02ffff03ffff20ff1780ffff01ff02ff3effff04ff02ffff04ff05ffff04ff1bffff04ff33ffff04ff2fffff04ff5fff8080808080808080ffff01ff088080ff0180ffff01ff04ff13ffff02ff3effff04ff02ffff04ff05ffff04ff1bffff04ff17ffff04ff2fffff04ff5fff80808080808080808080ff0180ffff01ff02ffff03ffff09ff23ffff0181e880ffff01ff02ff3effff04ff02ffff04ff05ffff04ff1bffff04ff17ffff04ffff02ffff03ffff22ffff09ffff02ff2effff04ff02ffff04ff53ff80808080ff82014f80ffff20ff5f8080ffff01ff02ff53ffff04ff818fffff04ff82014fffff04ff81b3ff8080808080ffff01ff088080ff0180ffff04ff2cff8080808080808080ffff01ff04ff13ffff02ff3effff04ff02ffff04ff05ffff04ff1bffff04ff17ffff04ff2fffff04ff5fff80808080808080808080ff018080ff0180ffff01ff04ffff04ff18ffff04ffff02ff16ffff04ff02ffff04ff05ffff04ff27ffff04ffff0bff2cff82014f80ffff04ffff02ff2effff04ff02ffff04ff818fff80808080ffff04ffff0bff2cff0580ff8080808080808080ff378080ff81af8080ff0180ff018080");
-pub const NFT_STATE_LAYER_HASH: [u8; 32] = hex!("a04d9f57764f54a43e4030befb4d80026e870519aaa66334aef8304f5d0393c2");
+pub const NFT_STATE_LAYER_HASH: [u8; 32] =
+    hex!("a04d9f57764f54a43e4030befb4d80026e870519aaa66334aef8304f5d0393c2");
 
 /// ```text
 /// (mod (CONDITIONS nonce)
@@ -2432,12 +2459,13 @@ pub const NFT_STATE_LAYER_HASH: [u8; 32] = hex!("a04d9f57764f54a43e4030befb4d800
 /// )
 /// ```
 pub const CONDITIONS_W_FEE_ANNOUNCE: [u8; 21] = hex!("ff04ffff04ffff013cffff04ff05ff808080ff0280");
-pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8eb79f02823e1595ba0aca53820f503eda5ff20b47856");
+pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] =
+    hex!("1a169582dc619f2542f8eb79f02823e1595ba0aca53820f503eda5ff20b47856");
 
 /// ```text
 /// ; This is an outer puzzle for a coin that imposes a restriction that the coin can only be spent with an
 /// ; announcement from a "verified credential" whose proofs are present due to a DID in a list of authorized providers.
-/// 
+///
 /// ; A "verified credential" is defined as the following puzzle stack:
 /// ;  - singleton top layer
 /// ;    |_exigent metadata layer
@@ -2479,11 +2507,11 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///     my_coin_id  ; This coin's ID
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (include curry.clib)
 ///   (include condition_codes.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   ; take two lists and merge them into one
 ///   (defun merge_list (list_a list_b)
 ///     (if list_a
@@ -2491,22 +2519,22 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///         list_b
 ///     )
 ///   )
-/// 
+///
 ///   (defconstant announcement_namespace 0xcd)
 ///   (defconstant ONE 1)
-/// 
+///
 ///   (defun-inline wrap_puzhash
 ///     (
 ///       SELF_HASH
 ///       puzhash
 ///     )
-/// 
+///
 ///     (curry_hashes SELF_HASH
 ///       (sha256 ONE SELF_HASH)
 ///       puzhash
 ///     )
 ///   )
-/// 
+///
 ///   ; Does three things:
 ///   ; 1) Wraps create coins with this layer
 ///   ; 2) Announces those create coins in a namespace
@@ -2554,7 +2582,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///         ()
 ///     )
 ///   )
-/// 
+///
 ///   (defun create_vc_puzhash_stage_2
 ///     (
 ///       (
@@ -2588,7 +2616,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       credential_inner_puzhash
 ///       tp_hash
 ///     )
-/// 
+///
 ///     (curry_hashes SINGLETON_MOD_HASH
 ///       credential_singleton_struct_hash
 ///       (curry_hashes OWNERSHIP_LAYER_MOD_HASH
@@ -2603,7 +2631,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun create_vc_puzhash
 ///     (
 ///       CREDENTIAL_STRUCT
@@ -2612,7 +2640,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       proof_hash
 ///       credential_inner_puzhash
 ///     )
-/// 
+///
 ///     (create_vc_puzhash_stage_2
 ///       CREDENTIAL_STRUCT
 ///       provider_id
@@ -2648,7 +2676,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   ; utility function that turns the output of two calls to collapse_tree_and_note_leaf_info into a single return value
 ///   (defun branch_hash_and_merge_info ((TREE1 PROOFS1) (TREE2 PROOFS2))
 ///     (list
@@ -2656,7 +2684,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       (merge_list PROOFS1 PROOFS2)
 ///     )
 ///   )
-/// 
+///
 ///   (defun collapse_tree_and_note_leaf_info (TREE PROOFS)
 ///     (if (l TREE)
 ///         (if (or (l (f TREE)) (l (r TREE)))  ; If either side is a cons, we have not reached a leaf pair yet
@@ -2674,7 +2702,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///         (list TREE PROOFS)  ; All atoms that we reach must be pre-hashed subtrees
 ///     )
 ///   )
-/// 
+///
 ///   (defun main
 ///     (
 ///       CREDENTIAL_STRUCT
@@ -2689,7 +2717,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       conditions
 ///       (tree_hash proofs)
 ///     )
-/// 
+///
 ///     (assert
 ///       ; Run proof checker to make sure it doesn't return () (fail)
 ///       (a PROOFS_CHECKER (list proofs proof_checker_solution))
@@ -2724,7 +2752,7 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (main
 ///     CREDENTIAL_STRUCT
 ///     AUTHORIZED_PROVIDERS
@@ -2741,7 +2769,8 @@ pub const CONDITIONS_W_FEE_ANNOUNCE_HASH: [u8; 32] = hex!("1a169582dc619f2542f8e
 /// )
 /// ```
 pub const CREDENTIAL_RESTRICTION: [u8; 1648] = hex!("ff02ffff01ff02ff2effff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff82017fffff04ff8202ffffff04ff8205ffffff04ff820bffffff04ff8217ffffff04ffff02ff5fff822fff80ffff04ffff02ff22ffff04ff02ffff04ff81bfffff01ff8080808080ff8080808080808080808080808080ffff04ffff01ffffffff463fff333cffff0102ff81cdffff04ffff0bff34ff09ff1380ffff04ffff02ff5effff04ff02ffff04ff15ffff04ff2bff8080808080ff808080ff02ffff03ff05ffff01ff0bff81f2ffff02ff26ffff04ff02ffff04ff09ffff04ffff02ff7cffff04ff02ffff04ff0dff80808080ff808080808080ffff0181d280ff0180ffffffff02ffff03ffff07ff0580ffff01ff02ffff03ffff02ffff03ffff07ff0980ffff01ff0101ffff01ff02ffff03ffff07ff0d80ffff01ff0101ff8080ff018080ff0180ffff01ff02ff5cffff04ff02ffff04ffff02ff22ffff04ff02ffff04ff09ffff01ff8080808080ffff04ffff02ff22ffff04ff02ffff04ff0dffff04ff0bff8080808080ff8080808080ffff01ff02ff5cffff04ff02ffff04ffff04ffff0bff24ff0980ffff01ff808080ffff04ffff04ffff0bff24ff0d80ffff04ffff04ff05ff0b80ff808080ff808080808080ff0180ffff01ff04ff05ffff04ff0bff80808080ff0180ffffa04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459aa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ffa102a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222a102a8d5dd63fba471ebcb1f3e8f7c1e1879b7152a6e7298a91ce119a63400ade7c5ffff02ff5affff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ffff02ff7affff04ff02ffff04ff39ffff04ffff0bff81b2ffff0bff2dffff0bff34ffff0bff81f2ffff0bff34ffff0bff34ff81d2ffff0bff24ffff02ff7affff04ff02ffff04ff21ffff04ff17ffff04ff15ff8080808080808080ff3d8080ff8192808080ff8080808080ff808080808080808080ffff02ff7affff04ff02ffff04ff21ffff04ff17ffff04ffff02ff7affff04ff02ffff04ff29ffff04ffff0bff24ff2980ffff04ffff0bff34ffff0bff24ff0b80ffff0bff24ff2f8080ffff04ff81bfffff04ffff0bff24ff81bf80ffff04ff5fff808080808080808080ff808080808080ff0bff81b2ffff02ff26ffff04ff02ffff04ff05ffff04ffff02ff7cffff04ff02ffff04ff07ff80808080ff808080808080ffffff0bff34ffff0bff34ff81d2ff0580ffff0bff34ff0bff81928080ff02ffff03ff0bffff01ff03ffff09ff05ff1380ffff0101ffff02ff36ffff04ff02ffff04ff05ffff04ff1bff808080808080ff8080ff0180ffff02ffff03ffff02ff17ffff04ff8257ffffff04ff5fff80808080ffff01ff02ffff03ffff02ff36ffff04ff02ffff04ff81bfffff04ff0bff8080808080ffff01ff04ffff04ff20ffff04ff8205ffff808080ffff04ffff04ff30ffff04ffff0bffff02ff2affff04ff02ffff04ff05ffff04ff81bfffff04ffff0bff34ffff0bff24ff2180ffff0bff34ffff0bff24ff82017f80ffff0bff24ff31808080ffff04ff8227ffffff04ff8202ffff8080808080808080ffff0bff8205ffffff0181ca8080ff808080ffff02ff7effff04ff02ffff04ff2fffff04ff820bffff80808080808080ffff01ff088080ff0180ffff01ff088080ff0180ffff02ffff03ff05ffff01ff04ff09ffff02ff5effff04ff02ffff04ff0dffff04ff0bff808080808080ffff010b80ff0180ff02ffff03ff0bffff01ff02ffff03ffff09ff23ff2880ffff01ff04ffff04ff38ffff04ffff0eff2cffff0bff53ff81b38080ff808080ffff04ffff04ff28ffff04ffff02ff7affff04ff02ffff04ff05ffff04ffff0bff24ff0580ffff04ff53ff808080808080ff738080ffff02ff7effff04ff02ffff04ff05ffff04ff1bff80808080808080ffff01ff02ffff03ffff02ffff03ffff20ffff09ff23ff388080ffff01ff0101ffff01ff02ffff03ffff20ffff09ffff0121ffff0dff53808080ffff01ff0101ffff01ff02ffff03ffff20ffff09ff2cffff0cff53ff80ff24808080ffff01ff0101ff8080ff018080ff018080ff0180ffff01ff04ff13ffff02ff7effff04ff02ffff04ff05ffff04ff1bff808080808080ffff01ff088080ff018080ff0180ff8080ff0180ff018080");
-pub const CREDENTIAL_RESTRICTION_HASH: [u8; 32] = hex!("2fdfc1f058cfd65e7ec4e253bfeb394da163ecd0036f508df8629b0a2b8fde96");
+pub const CREDENTIAL_RESTRICTION_HASH: [u8; 32] =
+    hex!("2fdfc1f058cfd65e7ec4e253bfeb394da163ecd0036f508df8629b0a2b8fde96");
 
 /// ```text
 /// ; This is a PROOFS_CHECKER for use with credential_restriction.clsp
@@ -2755,9 +2784,9 @@ pub const CREDENTIAL_RESTRICTION_HASH: [u8; 32] = hex!("2fdfc1f058cfd65e7ec4e253
 ///     proofs  ; will be sorted
 ///     solution  ; unused
 ///   )
-/// 
+///
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defun insertion_sort_by_keys (sorted insertions)
 ///     (if insertions
 ///         (if (or (not sorted) (>s (f (f insertions)) (f (f sorted))))
@@ -2767,14 +2796,14 @@ pub const CREDENTIAL_RESTRICTION_HASH: [u8; 32] = hex!("2fdfc1f058cfd65e7ec4e253
 ///         sorted
 ///     )
 ///   )
-/// 
+///
 ///   (defun merge_insertion_sort (proofs)
 ///     (if (r proofs)
 ///         (insertion_sort_by_keys (merge_insertion_sort (r proofs)) (merge_insertion_sort (list (f proofs))))
 ///         proofs
 ///     )
 ///   )
-/// 
+///
 ///   ; This function checks that the revealed proofs START WITH the same key/value pairs as are in FLAGS. This is not for
 ///   ; any particular reason except optimization. We don't really care if EXTRA proof pairs are revealed.
 ///   (defun compare_first_pairs_against_flags (subject comp)
@@ -2786,12 +2815,13 @@ pub const CREDENTIAL_RESTRICTION_HASH: [u8; 32] = hex!("2fdfc1f058cfd65e7ec4e253
 ///         1
 ///     )
 ///   )
-/// 
+///
 ///   (compare_first_pairs_against_flags FLAGS (merge_insertion_sort proofs))
 /// )
 /// ```
 pub const FLAG_PROOFS_CHECKER: [u8; 399] = hex!("ff02ffff01ff02ff04ffff04ff02ffff04ff05ffff04ffff02ff0effff04ff02ffff04ff0bff80808080ff8080808080ffff04ffff01ffff02ffff03ff05ffff01ff02ffff03ffff18ffff09ff11ff2380ffff09ff19ff338080ffff01ff02ff04ffff04ff02ffff04ff0dffff04ff1bff8080808080ff8080ff0180ffff01ff010180ff0180ffff02ffff03ff0bffff01ff02ffff03ffff02ffff03ffff20ff0580ffff01ff0101ffff01ff02ffff03ffff0aff23ff1180ffff01ff0101ff8080ff018080ff0180ffff01ff02ff0affff04ff02ffff04ffff04ff13ff0580ffff04ff1bff8080808080ffff01ff02ff0affff04ff02ffff04ffff04ff09ffff02ff0affff04ff02ffff04ff0dffff04ffff04ff13ff8080ff808080808080ffff04ff1bff808080808080ff0180ffff010580ff0180ff02ffff03ff0dffff01ff02ff0affff04ff02ffff04ffff02ff0effff04ff02ffff04ff0dff80808080ffff04ffff02ff0effff04ff02ffff04ffff04ff09ff8080ff80808080ff8080808080ffff010580ff0180ff018080");
-pub const FLAG_PROOFS_CHECKER_HASH: [u8; 32] = hex!("fe2e3c631562fbb9be095297f762bf573705a0197164e9361ad5d50e045ba241");
+pub const FLAG_PROOFS_CHECKER_HASH: [u8; 32] =
+    hex!("fe2e3c631562fbb9be095297f762bf573705a0197164e9361ad5d50e045ba241");
 
 /// ```text
 /// ; This is a utility layer for a coin that allows it to prove that it came from some INITIAL_PUZZLE_HASH
@@ -2804,9 +2834,9 @@ pub const FLAG_PROOFS_CHECKER_HASH: [u8; 32] = hex!("fe2e3c631562fbb9be095297f76
 ///     morpher_solution  ; solution to PARENT_MORPHER
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   (c
 ///     (list ASSERT_MY_PARENT_ID
 ///       (sha256
@@ -2826,11 +2856,12 @@ pub const FLAG_PROOFS_CHECKER_HASH: [u8; 32] = hex!("fe2e3c631562fbb9be095297f76
 /// )
 /// ```
 pub const COVENANT_LAYER: [u8; 110] = hex!("ff02ffff01ff04ffff04ff02ffff04ffff0bff4fffff02ffff03ff81efffff01ff02ff0bffff04ff05ffff04ff81afff5f808080ffff010580ff0180ffff02ffff03ff81efffff0182016fffff0181af80ff018080ff808080ffff02ff17ff81bf8080ffff04ffff0147ff018080");
-pub const COVENANT_LAYER_HASH: [u8; 32] = hex!("b982796850336aabf9ab17c3f21e299f0c633444117ab5e9ebeafadf1860d9fc");
+pub const COVENANT_LAYER_HASH: [u8; 32] =
+    hex!("b982796850336aabf9ab17c3f21e299f0c633444117ab5e9ebeafadf1860d9fc");
 
 /// ```text
 /// ; This is a PARENT_MORPHER for use with covenant_layer.clsp
-/// 
+///
 /// ; It is used to prove that the parent was a singleton -> exigent metadata layer (w/ covenant_layer in TP) puzzle stack
 /// (mod
 ///   (
@@ -2852,11 +2883,11 @@ pub const COVENANT_LAYER_HASH: [u8; 32] = hex!("b982796850336aabf9ab17c3f21e299f
 ///     previous_metadata_hash  ; pre-treehashed METADATA from our parent's EML
 ///     my_singleton_id  ; no need to commit to this, our parent is guaranteed to be a singleton with the same ID as ours
 ///   )
-/// 
+///
 ///   (include curry.clib)
-/// 
+///
 ///   (defconstant ONE 1)
-/// 
+///
 ///   (defun main
 ///     (
 ///       EML_MOD_HASH
@@ -2867,7 +2898,7 @@ pub const COVENANT_LAYER_HASH: [u8; 32] = hex!("b982796850336aabf9ab17c3f21e299f
 ///       my_singleton_id
 ///       tp_hash
 ///     )
-/// 
+///
 ///     (curry_hashes SINGLETON_MOD_HASH
 ///       (sha256 TWO
 ///         (sha256 ONE SINGLETON_MOD_HASH)
@@ -2885,7 +2916,7 @@ pub const COVENANT_LAYER_HASH: [u8; 32] = hex!("b982796850336aabf9ab17c3f21e299f
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (main
 ///     EML_MOD_HASH
 ///     SINGLETON_MOD_HASH
@@ -2906,7 +2937,8 @@ pub const COVENANT_LAYER_HASH: [u8; 32] = hex!("b982796850336aabf9ab17c3f21e299f
 /// )
 /// ```
 pub const EML_COVENANT_MORPHER: [u8; 589] = hex!("ff02ffff01ff02ff1effff04ff02ffff04ff0bffff04ff2fffff04ff5fffff04ff8205ffffff04ff820bffffff04ff8217ffffff04ffff02ff1affff04ff02ffff04ff17ffff04ffff02ff1affff04ff02ffff04ff05ffff04ffff0bff08ff8202ff80ffff04ffff02ff1affff04ff02ffff04ff82017fffff04ffff0bff08ff82017f80ff8080808080ffff04ff81bfff80808080808080ff8080808080ff80808080808080808080ffff04ffff01ffff01ff02ff02ffff03ff05ffff01ff0bff72ffff02ff16ffff04ff02ffff04ff09ffff04ffff02ff1cffff04ff02ffff04ff0dff80808080ff808080808080ffff016280ff0180ffffffffa04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459aa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ffa102a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222a102a8d5dd63fba471ebcb1f3e8f7c1e1879b7152a6e7298a91ce119a63400ade7c5ff0bff52ffff02ff16ffff04ff02ffff04ff05ffff04ffff02ff1cffff04ff02ffff04ff07ff80808080ff808080808080ffff0bff14ffff0bff14ff62ff0580ffff0bff14ff0bff428080ff02ff1affff04ff02ffff04ff0bffff04ffff0bff14ffff0bff08ff0b80ffff0bff14ffff0bff08ff81bf80ff178080ffff04ffff02ff1affff04ff02ffff04ff05ffff04ffff0bff08ff0580ffff04ff5fffff04ff82017fffff04ffff0bff08ff82017f80ffff04ff2fff808080808080808080ff808080808080ff018080");
-pub const EML_COVENANT_MORPHER_HASH: [u8; 32] = hex!("6a87946257f555ae82aca6a11b5205058b844f634ecb6c7dc6b0c54eb2996308");
+pub const EML_COVENANT_MORPHER_HASH: [u8; 32] =
+    hex!("6a87946257f555ae82aca6a11b5205058b844f634ecb6c7dc6b0c54eb2996308");
 
 /// ```text
 /// ; This is a layer that adapts the API between an ownership layer and its transfer program when the transfer program is
@@ -2923,14 +2955,14 @@ pub const EML_COVENANT_MORPHER_HASH: [u8; 32] = hex!("6a87946257f555ae82aca6a11b
 ///       inner_solution
 ///     )
 ///   )
-/// 
+///
 ///   ; Solution from covenant layer comes back like so:
 ///   ; ((ASSERT_MY_PARENT_ID 0x...) new_metadata new_tp conditions)
 ///   ; so we need to move that ASSERT_MY_PARENT_ID to the returned conditions from the TP
 ///   (defun fix_condition ((parent_assertion . (new_owner new_tp conditions)))
 ///     (list new_owner new_tp (c parent_assertion conditions))
 ///   )
-/// 
+///
 ///   (fix_condition (a
 ///       COVENANT_LAYER
 ///       (list
@@ -2943,14 +2975,15 @@ pub const EML_COVENANT_MORPHER_HASH: [u8; 32] = hex!("6a87946257f555ae82aca6a11b
 /// )
 /// ```
 pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER: [u8; 104] = hex!("ff02ffff01ff02ff02ffff04ff02ffff04ffff02ff05ffff04ff4fffff04ff81afffff04ffff04ff0bffff04ff17ffff04ff82016fff80808080ff8080808080ff80808080ffff04ffff01ff04ff15ffff04ff2dffff04ffff04ff09ff5d80ff80808080ff018080");
-pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER_HASH: [u8; 32] = hex!("4218fbebbb6f3c0907ebe8a672fa5d1e4bc655645a3a0073601e6c9b50b07c47");
+pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER_HASH: [u8; 32] =
+    hex!("4218fbebbb6f3c0907ebe8a672fa5d1e4bc655645a3a0073601e6c9b50b07c47");
 
 /// ```text
 /// ; This is a TRANSFER_PROGRAM for use with exigent_metadata_layer.clsp
-/// 
+///
 /// ; Given a DID's singleton struct, assert its announcement of any changes. If no DID's innerpuz is provided, then just
 /// ; return the same metadata and transfer program with no conditions
-/// 
+///
 /// ; This TP also allows metadata to be cleared and transfer program to be reset simultaneously, no DID required
 /// (mod
 ///   (
@@ -2969,14 +3002,14 @@ pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER_HASH: [u8; 32] = hex!("4218fbebb
 ///     ;  - () == continue with the same metadata we currently have
 ///     ;  - new_transfer_program_hash == update the transfer program to whatever, but clear the metadata
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry.clib)
 ///   (include sha256tree.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defconstant ONE 1)
-/// 
+///
 ///   (defun-inline create_did_puzhash
 ///     (
 ///       SINGLETON_MOD_HASH
@@ -2984,7 +3017,7 @@ pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER_HASH: [u8; 32] = hex!("4218fbebb
 ///       provider_id
 ///       provider_innerpuzhash
 ///     )
-/// 
+///
 ///     (curry_hashes_inline SINGLETON_MOD_HASH
 ///       ; calculate the singleton struct
 ///       (sha256 TWO
@@ -2997,7 +3030,7 @@ pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER_HASH: [u8; 32] = hex!("4218fbebb
 ///       provider_innerpuzhash
 ///     )
 ///   )
-/// 
+///
 ///   ; Returning (new_metadata new_transfer_program_hash conditions)
 ///   (if (l (f (r (r (r (r (r @)))))))  ; If a tp solution was provided
 ///       (list
@@ -3028,7 +3061,8 @@ pub const EML_TRANSFER_PROGRAM_COVENANT_ADAPTER_HASH: [u8; 32] = hex!("4218fbebb
 /// )
 /// ```
 pub const EML_UPDATE_METADATA_WITH_DID: [u8; 552] = hex!("ff02ffff01ff02ffff03ffff07ff5f80ffff01ff04ffff03ff8202dfffff04ff27ff8202df80ff8080ffff04ff8205dfffff04ffff04ffff04ff08ffff04ff82015fff808080ffff04ffff04ff14ffff04ffff0bffff0bff56ffff0bff0affff0bff0aff66ff0580ffff0bff0affff0bff76ffff0bff0affff0bff0aff66ffff0bff0affff0bff1cff0580ffff0bff0affff0bff1cff2780ffff0bff1cff0b80808080ffff0bff0affff0bff76ffff0bff0affff0bff0aff66ff819f80ffff0bff0aff66ff46808080ff46808080ff46808080ffff0bff82015fffff02ff1effff04ff02ffff04ff8202dfff80808080ff8205df8080ff808080ff808080ff80808080ffff01ff02ffff03ff5fffff01ff04ff80ffff04ff5fffff01ff80808080ffff01ff04ffff04ff27ff3780ffff01ff80ff80808080ff018080ff0180ffff04ffff01ffff46ff3f01ff02ffffffa04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459aa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ffa102a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222a102a8d5dd63fba471ebcb1f3e8f7c1e1879b7152a6e7298a91ce119a63400ade7c5ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009b4b0e941707d50b91885c99d0b27ef882e1294e771139d");
+pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] =
+    hex!("d3a9a1fc20f247d009b4b0e941707d50b91885c99d0b27ef882e1294e771139d");
 
 /// ```text
 /// ; This layer is an outer puzzle that keeps some metadata that must be reaffirmed by a "transfer program" on every spend.
@@ -3048,11 +3082,11 @@ pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009
 ///     INNER_PUZZLE
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defun-inline nft_ownership_layer_puzzle_hash
 ///     (
 ///       THIS_MOD_HASH
@@ -3068,7 +3102,7 @@ pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009
 ///       (sha256 ONE THIS_MOD_HASH)
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline construct_end_conditions
 ///     (
 ///       THIS_MOD_HASH
@@ -3093,7 +3127,7 @@ pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009
 ///       conditions
 ///     )
 ///   )
-/// 
+///
 ///   (defun process_conditions
 ///     (
 ///       THIS_MOD_HASH
@@ -3165,7 +3199,7 @@ pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun main
 ///     (
 ///       THIS_MOD_HASH
@@ -3184,7 +3218,7 @@ pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009
 ///       (list () () ())
 ///     )
 ///   )
-/// 
+///
 ///   ; main
 ///   (main
 ///     THIS_MOD_HASH
@@ -3196,11 +3230,12 @@ pub const EML_UPDATE_METADATA_WITH_DID_HASH: [u8; 32] = hex!("d3a9a1fc20f247d009
 /// )
 /// ```
 pub const EXIGENT_METADATA_LAYER: [u8; 888] = hex!("ff02ffff01ff02ff3affff04ff02ffff04ff05ffff04ff17ffff04ff2fffff04ff0bffff04ffff02ff5fff81bf80ff8080808080808080ffff04ffff01ffffff02ff3304ff01ff0101ffff02ffff02ffff03ff05ffff01ff02ff2affff04ff02ffff04ff0dffff04ffff0bff12ffff0bff14ff3880ffff0bff12ffff0bff12ffff0bff14ff2c80ff0980ffff0bff12ff0bffff0bff14ff8080808080ff8080808080ffff010b80ff0180ff02ff16ffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff5fffff01ffff80ff80ff8080808080808080808080ffff04ffff03ff820b7fff820b7fffff04ff3cff808080ffff02ffff03ff81bfffff01ff02ff16ffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ff2fffff04ff5fffff04ff8201bfffff04ffff02ffff03ffff09ff82023fff2880ffff01ff02ffff03ffff18ff820b3fffff010180ffff01ff02ffff03ffff20ff82027f80ffff01ff04ff82033fffff04ff82057fffff01ff80808080ffff01ff088080ff0180ffff01ff04ff82027fffff04ff82057fffff04ff82013fff8080808080ff0180ffff01ff02ffff03ffff09ff82023fffff0181f680ffff01ff02ffff03ffff20ff82057f80ffff01ff04ff82027fffff04ffff02ff0bffff04ff2fffff04ff5fffff04ff82033fff8080808080ffff01ff80808080ffff01ff088080ff0180ffff01ff04ff82027fffff04ff82057fffff04ff82013fff8080808080ff018080ff0180ff80808080808080808080ffff01ff04ffff04ff28ffff04ffff02ff2effff04ff02ffff04ff05ffff04ff82047fffff04ffff0bff14ffff02ffff03ff82157fffff0182157fffff011780ff018080ffff04ffff02ffff03ff82157fffff0182157fffff011780ff0180ffff04ffff02ff3effff04ff02ffff04ff82097fff80808080ffff04ffff0bff14ff0580ff808080808080808080ff82067f8080ff822d7f8080ff018080ffff0bff12ffff0bff14ff1080ffff0bff12ffff0bff12ffff0bff14ff2c80ff0580ffff0bff12ffff02ff2affff04ff02ffff04ff07ffff04ffff0bff14ff1480ff8080808080ffff0bff14ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff3effff04ff02ffff04ff09ff80808080ffff02ff3effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const EXIGENT_METADATA_LAYER_HASH: [u8; 32] = hex!("d5fd32e069fda83e230ccd8f6a7c4f652231aed5c755514b3d996cbeff4182b8");
+pub const EXIGENT_METADATA_LAYER_HASH: [u8; 32] =
+    hex!("d5fd32e069fda83e230ccd8f6a7c4f652231aed5c755514b3d996cbeff4182b8");
 
 /// ```text
 /// ; This is a generalization of the idea behind singleton_launcher.clsp
-/// 
+///
 /// ; Given a delegated puzzle and solution, just run them and announce the hash of the delegated puzzle.
 /// ; A parent can rely on this announcement so if the exact delegated_puzzle it is expecting is not run, the whole bundle
 /// ; fails due to a grandparent paradox.
@@ -3209,19 +3244,20 @@ pub const EXIGENT_METADATA_LAYER_HASH: [u8; 32] = hex!("d5fd32e069fda83e230ccd8f
 ///     delegated_puzzle
 ///     delegated_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include sha256tree.clib)
-/// 
+///
 ///   (c (list CREATE_COIN_ANNOUNCEMENT (sha256tree delegated_puzzle)) (a delegated_puzzle delegated_solution))
 /// )
 /// ```
 pub const P2_ANNOUNCED_DELEGATED_PUZZLE: [u8; 137] = hex!("ff02ffff01ff04ffff04ff04ffff04ffff02ff06ffff04ff02ffff04ff05ff80808080ff808080ffff02ff05ff0b8080ffff04ffff01ff3cff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff06ffff04ff02ffff04ff09ff80808080ffff02ff06ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_ANNOUNCED_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("c4d24c3c5349376f3e8f3aba202972091713b4ec4915f0f26192ae4ace0bd04d");
+pub const P2_ANNOUNCED_DELEGATED_PUZZLE_HASH: [u8; 32] =
+    hex!("c4d24c3c5349376f3e8f3aba202972091713b4ec4915f0f26192ae4ace0bd04d");
 
 /// ```text
 /// ; This is the standard puzzle that a VerifiedCredential provider will put into the revocation layer slot of revocation_layer.clsp
-/// 
+///
 /// ; The goal of this puzzle is to recreate the VC exactly as it is except for three things:
 /// ; 1) There is no longer a revocation layer
 /// ; 2) The metadata in the ownership layer becomes ()
@@ -3248,12 +3284,12 @@ pub const P2_ANNOUNCED_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("c4d24c3c5349376f3
 ///       my_coin_id
 ///     )
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry.clib)
-/// 
+///
 ///   (defconstant ONE 1)
-/// 
+///
 ///   (list
 ///     ; The purpose of this condition is just to make sure we're telling the truth about the current inner puzzle hash
 ///     (list ASSERT_MY_PUZZLEHASH
@@ -3296,11 +3332,12 @@ pub const P2_ANNOUNCED_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("c4d24c3c5349376f3
 /// )
 /// ```
 pub const STANDARD_VC_REVOCATION_PUZZLE: [u8; 652] = hex!("ff02ffff01ff04ffff04ff18ffff04ffff02ff2effff04ff02ffff04ff05ffff04ffff0bff12ffff0bff3cff0580ffff0bff12ffff0bff3cff81bf80ff0b8080ffff04ffff02ff2effff04ff02ffff04ff17ffff04ffff0bff3cff1780ffff04ff82017fffff04ff8202ffffff04ffff0bff3cff8202ff80ffff04ffff02ff2effff04ff02ffff04ff2fffff04ffff0bff3cff2f80ffff04ff8205ffffff04ffff0bff3cff820bff80ff80808080808080ff808080808080808080ff808080808080ff808080ffff04ffff04ff10ffff04ff8217ffff808080ffff04ffff04ff14ffff04ff820bffffff04ff8217ffff80808080ffff04ffff04ff2cffff04ff82bfffff808080ffff04ffff04ffff0181f6ffff04ff822fffffff04ffff04ff825fffffff04ff81bfff808080ffff04ffff04ff83027fffffff04ff83057fffffff04ff80ffff04ff5fff8080808080ff8080808080ff808080808080ffff04ffff01ffffff4948ff33ff3c01ffff02ff02ffff03ff05ffff01ff0bff76ffff02ff3effff04ff02ffff04ff09ffff04ffff02ff1affff04ff02ffff04ff0dff80808080ff808080808080ffff016680ff0180ffffffa04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459aa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ffa102a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222a102a8d5dd63fba471ebcb1f3e8f7c1e1879b7152a6e7298a91ce119a63400ade7c5ffff0bff56ffff02ff3effff04ff02ffff04ff05ffff04ffff02ff1affff04ff02ffff04ff07ff80808080ff808080808080ff0bff12ffff0bff12ff66ff0580ffff0bff12ff0bff468080ff018080");
-pub const STANDARD_VC_REVOCATION_PUZZLE_HASH: [u8; 32] = hex!("fbce76408ebaf9b3d0b8cd90cc68607755eeca67cd7432d5eea85f3f498cc002");
+pub const STANDARD_VC_REVOCATION_PUZZLE_HASH: [u8; 32] =
+    hex!("fbce76408ebaf9b3d0b8cd90cc68607755eeca67cd7432d5eea85f3f498cc002");
 
 /// ```text
 /// ; This is a PARENT_MORPHER for use with covenant_layer.clsp
-/// 
+///
 /// ; You would use this morpher when the covenant layer is the outermost layer of the coin
 /// (mod
 ///   (
@@ -3309,9 +3346,9 @@ pub const STANDARD_VC_REVOCATION_PUZZLE_HASH: [u8; 32] = hex!("fbce76408ebaf9b3d
 ///     COVENANT_INITIAL_PUZZLE_HASH
 ///     inner_puzhash
 ///   )
-/// 
+///
 ///   (include curry.clib)
-/// 
+///
 ///   (curry_hashes_inline COVENANT_MOD_HASH
 ///     (sha256 1 COVENANT_INITIAL_PUZZLE_HASH)
 ///     (curry_hashes_inline THIS_MOD_HASH
@@ -3324,12 +3361,13 @@ pub const STANDARD_VC_REVOCATION_PUZZLE_HASH: [u8; 32] = hex!("fbce76408ebaf9b3d
 /// )
 /// ```
 pub const STD_PARENT_MORPHER: [u8; 427] = hex!("ff02ffff01ff0bff16ffff0bff04ffff0bff04ff1aff0b80ffff0bff04ffff0bff1effff0bff04ffff0bff04ff1affff0bffff0101ff178080ffff0bff04ffff0bff1effff0bff04ffff0bff04ff1affff0bff16ffff0bff04ffff0bff04ff1aff0580ffff0bff04ffff0bff1effff0bff04ffff0bff04ff1affff0bffff0101ff058080ffff0bff04ffff0bff1effff0bff04ffff0bff04ff1affff0bffff0101ff0b8080ffff0bff04ffff0bff1effff0bff04ffff0bff04ff1affff0bffff0101ff178080ffff0bff04ff1aff12808080ff12808080ff12808080ff1280808080ffff0bff04ffff0bff1effff0bff04ffff0bff04ff1aff2f80ffff0bff04ff1aff12808080ff12808080ff12808080ff12808080ffff04ffff01ff02ffffa04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459aa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ffa102a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222a102a8d5dd63fba471ebcb1f3e8f7c1e1879b7152a6e7298a91ce119a63400ade7c5ff018080");
-pub const STD_PARENT_MORPHER_HASH: [u8; 32] = hex!("8c3f1dc2e46c0d7ec4c2cbd007e23c0368ff8f80c5bc0101647a5c27626ebce6");
+pub const STD_PARENT_MORPHER_HASH: [u8; 32] =
+    hex!("8c3f1dc2e46c0d7ec4c2cbd007e23c0368ff8f80c5bc0101647a5c27626ebce6");
 
 /// ```text
 /// ; This layer ensures that a second puzzle hash or "revocation layer" that can be used without the inner puzzle's permission
 /// ; travels with each generation of a coin.
-/// 
+///
 /// ; The hidden puzzle is responsible for recreating this layer if it wishes, this layer will not wrap its outputs.
 /// (mod
 ///   (
@@ -3340,28 +3378,28 @@ pub const STD_PARENT_MORPHER_HASH: [u8; 32] = hex!("8c3f1dc2e46c0d7ec4c2cbd007e2
 ///     inner_or_hidden_puzzle_reveal
 ///     inner_or_hidden_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry.clib)
 ///   (include sha256tree.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defconstant ONE 1)
-/// 
+///
 ///   (defun-inline wrap_puzhash
 ///     (
 ///       THIS_MOD_HASH
 ///       HIDDEN_PUZZLE_HASH
 ///       new_inner_puzzle_hash
 ///     )
-/// 
+///
 ///     (curry_hashes_inline THIS_MOD_HASH
 ///       (sha256 ONE THIS_MOD_HASH)
 ///       (sha256 ONE HIDDEN_PUZZLE_HASH)
 ///       (sha256 ONE new_inner_puzzle_hash)
 ///     )
 ///   )
-/// 
+///
 ///   (defun wrap_create_coins
 ///     (
 ///       THIS_MOD_HASH
@@ -3379,7 +3417,7 @@ pub const STD_PARENT_MORPHER_HASH: [u8; 32] = hex!("8c3f1dc2e46c0d7ec4c2cbd007e2
 ///         ()
 ///     )
 ///   )
-/// 
+///
 ///   (if hidden
 ///       (assert (= HIDDEN_PUZZLE_HASH (sha256tree inner_or_hidden_puzzle_reveal))
 ///         ; then
@@ -3393,7 +3431,8 @@ pub const STD_PARENT_MORPHER_HASH: [u8; 32] = hex!("8c3f1dc2e46c0d7ec4c2cbd007e2
 /// )
 /// ```
 pub const REVOCATION_LAYER: [u8; 653] = hex!("ff02ffff01ff02ffff03ff2fffff01ff02ffff03ffff09ff0bffff02ff16ffff04ff02ffff04ff5fff8080808080ffff01ff02ff5fff81bf80ffff01ff088080ff0180ffff01ff02ffff03ffff09ff17ffff02ff16ffff04ff02ffff04ff5fff8080808080ffff01ff02ff1effff04ff02ffff04ff05ffff04ff0bffff04ffff02ff5fff81bf80ff808080808080ffff01ff088080ff018080ff0180ffff04ffff01ffff33ff0102ffffffa04bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459aa09dcf97a184f32623d11a73124ceb99a5709b083721e878a16d78f596718ba7b2ffa102a12871fee210fb8619291eaea194581cbd2531e4b23759d225f6806923f63222a102a8d5dd63fba471ebcb1f3e8f7c1e1879b7152a6e7298a91ce119a63400ade7c5ffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff16ffff04ff02ffff04ff09ff80808080ffff02ff16ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ffff03ff17ffff01ff02ffff03ffff09ff47ff0880ffff01ff04ffff04ff08ffff04ffff0bff2affff0bff1cffff0bff1cff32ff0580ffff0bff1cffff0bff3affff0bff1cffff0bff1cff32ffff0bff14ff058080ffff0bff1cffff0bff3affff0bff1cffff0bff1cff32ffff0bff14ff0b8080ffff0bff1cffff0bff3affff0bff1cffff0bff1cff32ffff0bff14ff81a78080ffff0bff1cff32ff22808080ff22808080ff22808080ff22808080ff81e78080ffff02ff1effff04ff02ffff04ff05ffff04ff0bffff04ff37ff80808080808080ffff01ff04ff27ffff02ff1effff04ff02ffff04ff05ffff04ff0bffff04ff37ff8080808080808080ff0180ff8080ff0180ff018080");
-pub const REVOCATION_LAYER_HASH: [u8; 32] = hex!("00848115554ea674131f89f311707a959ad3f4647482648f3fe91ba289131f51");
+pub const REVOCATION_LAYER_HASH: [u8; 32] =
+    hex!("00848115554ea674131f89f311707a959ad3f4647482648f3fe91ba289131f51");
 
 /// ```text
 /// (mod
@@ -3402,16 +3441,17 @@ pub const REVOCATION_LAYER_HASH: [u8; 32] = hex!("00848115554ea674131f89f311707a
 ///     INNER_PUZZLE
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (c
 ///     CONDITION
 ///     (a INNER_PUZZLE inner_solution)
 ///   )
-/// 
+///
 /// )
 /// ```
 pub const AUGMENTED_CONDITION: [u8; 13] = hex!("ff04ff02ffff02ff05ff0b8080");
-pub const AUGMENTED_CONDITION_HASH: [u8; 32] = hex!("d303eafa617bedf0bc05850dd014e10fbddf622187dc07891a2aacba9d8a93f6");
+pub const AUGMENTED_CONDITION_HASH: [u8; 32] =
+    hex!("d303eafa617bedf0bc05850dd014e10fbddf622187dc07891a2aacba9d8a93f6");
 
 /// ```text
 /// (mod (
@@ -3423,7 +3463,8 @@ pub const AUGMENTED_CONDITION_HASH: [u8; 32] = hex!("d303eafa617bedf0bc05850dd01
 /// )
 /// ```
 pub const NOTIFICATION: [u8; 59] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff04ff0bff80808080ffff04ffff04ff06ffff01ff808080ff808080ffff04ffff01ff333cff018080");
-pub const NOTIFICATION_HASH: [u8; 32] = hex!("b8b9d8ffca6d5cba5422ead7f477ecfc8f6aaaa1c024b8c3aeb1956b24a0ab1e");
+pub const NOTIFICATION_HASH: [u8; 32] =
+    hex!("b8b9d8ffca6d5cba5422ead7f477ecfc8f6aaaa1c024b8c3aeb1956b24a0ab1e");
 
 /// ```text
 /// (mod
@@ -3433,24 +3474,25 @@ pub const NOTIFICATION_HASH: [u8; 32] = hex!("b8b9d8ffca6d5cba5422ead7f477ecfc8f
 ///     puzzle_to_execute
 ///     inner_solution
 ///   )
-/// 
+///
 ///   (include utility_macros.clib)
 ///   (include merkle_utils.clib)
-/// 
+///
 ///   ; takes a lisp tree and returns the hash of it
 ///   (defun sha256tree (TREE)
 ///     (if (l TREE)
 ///         (sha256 2 (sha256tree (f TREE)) (sha256tree (r TREE)))
 ///   (sha256 1 TREE)))
-/// 
+///
 ///   (assert (= MERKLE_ROOT (simplify_merkle_proof (sha256tree puzzle_to_execute) merkle_proof))
 ///     (a puzzle_to_execute inner_solution)
 ///   )
-/// 
+///
 /// )
 /// ```
 pub const P2_1_OF_N: [u8; 280] = hex!("ff02ffff01ff02ffff03ffff09ff05ffff02ff06ffff04ff02ffff04ffff0bffff0101ffff02ff04ffff04ff02ffff04ff17ff8080808080ffff04ff0bff808080808080ffff01ff02ff17ff2f80ffff01ff088080ff0180ffff04ffff01ffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff04ffff04ff02ffff04ff09ff80808080ffff02ff04ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ffff03ff1bffff01ff02ff06ffff04ff02ffff04ffff02ffff03ffff18ffff0101ff1380ffff01ff0bffff0102ff2bff0580ffff01ff0bffff0102ff05ff2b8080ff0180ffff04ffff04ffff17ff13ffff0181ff80ff3b80ff8080808080ffff010580ff0180ff018080");
-pub const P2_1_OF_N_HASH: [u8; 32] = hex!("46b29fd87fbeb6737600c4543931222a6c1ed3db6fa5601a3ca284a9f4efe780");
+pub const P2_1_OF_N_HASH: [u8; 32] =
+    hex!("46b29fd87fbeb6737600c4543931222a6c1ed3db6fa5601a3ca284a9f4efe780");
 
 /// ```text
 /// (mod (conditions)
@@ -3458,14 +3500,15 @@ pub const P2_1_OF_N_HASH: [u8; 32] = hex!("46b29fd87fbeb6737600c4543931222a6c1ed
 /// )
 /// ```
 pub const P2_CONDITIONS: [u8; 9] = hex!("ff04ffff0101ff0280");
-pub const P2_CONDITIONS_HASH: [u8; 32] = hex!("1c77d7d5efde60a7a1d2d27db6d746bc8e568aea1ef8586ca967a0d60b83cc36");
+pub const P2_CONDITIONS_HASH: [u8; 32] =
+    hex!("1c77d7d5efde60a7a1d2d27db6d746bc8e568aea1ef8586ca967a0d60b83cc36");
 
 /// ```text
 /// (mod
 ///   (public_key conditions)
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   ;; hash a tree
 ///   ;; This is used to calculate a puzzle hash given a puzzle program.
 ///   (defun sha256tree1
@@ -3475,21 +3518,22 @@ pub const P2_CONDITIONS_HASH: [u8; 32] = hex!("1c77d7d5efde60a7a1d2d27db6d746bc8
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   (c (list AGG_SIG_ME public_key (sha256tree1 conditions)) conditions)
-/// 
+///
 /// )
 /// ```
 pub const P2_DELEGATED_CONDITIONS: [u8; 137] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff04ffff02ff06ffff04ff02ffff04ff0bff80808080ff80808080ff0b80ffff04ffff01ff32ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff06ffff04ff02ffff04ff09ff80808080ffff02ff06ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] = hex!("0ff94726f1a8dea5c3f70d3121945190778d3b2b3fcda3735a1f290977e98341");
+pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] =
+    hex!("0ff94726f1a8dea5c3f70d3121945190778d3b2b3fcda3735a1f290977e98341");
 
 /// ```text
 /// ; build a pay-to delegated puzzle or hidden puzzle
 /// ; coins can be unlocked by signing a delegated puzzle and its solution
 /// ; OR by revealing the hidden puzzle and the underlying original key
-/// 
+///
 /// ; glossary of parameter names:
-/// 
+///
 /// ; hidden_puzzle: a "hidden puzzle" that can be revealed and used as an alternate
 /// ;   way to unlock the underlying funds
 /// ;
@@ -3506,8 +3550,8 @@ pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] = hex!("0ff94726f1a8dea5c3f70d3
 /// ;   desired conditions.
 /// ;
 /// ; solution: the solution to the delegated puzzle
-/// 
-/// 
+///
+///
 /// (mod
 ///   ; A puzzle should commit to `SYNTHETIC_PUBLIC_KEY`
 ///   ;
@@ -3518,23 +3562,23 @@ pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] = hex!("0ff94726f1a8dea5c3f70d3
 ///   ;
 ///   ; Or you can solve the hidden puzzle by revealing the `original_public_key`,
 ///   ; the hidden puzzle in `delegated_puzzle`, and a solution to the hidden puzzle.
-/// 
+///
 ///   (SYNTHETIC_PUBLIC_KEY original_public_key delegated_puzzle solution)
-/// 
+///
 ///   ; "assert" is a macro that wraps repeated instances of "if"
 ///   ; usage: (assert A0 A1 ... An R)
 ///   ; all of A0, A1, ... An must evaluate to non-null, or an exception is raised
 ///   ; return the value of R (if we get that far)
-/// 
+///
 ///   (defmacro assert items
 ///     (if (r items)
 ///         (list if (f items) (c assert (r items)) (q . (x)))
 ///         (f items)
 ///     )
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   ;; hash a tree
 ///   ;; This is used to calculate a puzzle hash given a puzzle program.
 ///   (defun sha256tree1
@@ -3544,9 +3588,9 @@ pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] = hex!("0ff94726f1a8dea5c3f70d3
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   ; "is_hidden_puzzle_correct" returns true iff the hidden puzzle is correctly encoded
-/// 
+///
 ///   (defun-inline is_hidden_puzzle_correct (SYNTHETIC_PUBLIC_KEY original_public_key delegated_puzzle)
 ///     (=
 ///       SYNTHETIC_PUBLIC_KEY
@@ -3556,9 +3600,9 @@ pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] = hex!("0ff94726f1a8dea5c3f70d3
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   ; "possibly_prepend_aggsig" is the main entry point
-/// 
+///
 ///   (defun-inline possibly_prepend_aggsig (SYNTHETIC_PUBLIC_KEY original_public_key delegated_puzzle conditions)
 ///     (if original_public_key
 ///         (assert
@@ -3568,24 +3612,25 @@ pub const P2_DELEGATED_CONDITIONS_HASH: [u8; 32] = hex!("0ff94726f1a8dea5c3f70d3
 ///         (c (list AGG_SIG_ME SYNTHETIC_PUBLIC_KEY (sha256tree1 delegated_puzzle)) conditions)
 ///     )
 ///   )
-/// 
+///
 ///   ; main entry point
-/// 
+///
 ///   (possibly_prepend_aggsig
 ///     SYNTHETIC_PUBLIC_KEY original_public_key delegated_puzzle
 ///   (a delegated_puzzle solution))
 /// )
 /// ```
 pub const P2_DELEGATED_PUZZLE_OR_HIDDEN_PUZZZLE: [u8; 227] = hex!("ff02ffff01ff02ffff03ff0bffff01ff02ffff03ffff09ff05ffff1dff0bffff1effff0bff0bffff02ff06ffff04ff02ffff04ff17ff8080808080808080ffff01ff02ff17ff2f80ffff01ff088080ff0180ffff01ff04ffff04ff04ffff04ff05ffff04ffff02ff06ffff04ff02ffff04ff17ff80808080ff80808080ffff02ff17ff2f808080ff0180ffff04ffff01ff32ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff06ffff04ff02ffff04ff09ff80808080ffff02ff06ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_DELEGATED_PUZZLE_OR_HIDDEN_PUZZZLE_HASH: [u8; 32] = hex!("e9aaa49f45bad5c889b86ee3341550c155cfdd10c3a6757de618d20612fffd52");
+pub const P2_DELEGATED_PUZZLE_OR_HIDDEN_PUZZZLE_HASH: [u8; 32] =
+    hex!("e9aaa49f45bad5c889b86ee3341550c155cfdd10c3a6757de618d20612fffd52");
 
 /// ```text
 /// (mod
-/// 
+///
 ///   (public_key delegated_puzzle delegated_puzzle_solution)
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   ;; hash a tree
 ///   ;; This is used to calculate a puzzle hash given a puzzle program.
 ///   (defun sha256tree1
@@ -3595,39 +3640,40 @@ pub const P2_DELEGATED_PUZZLE_OR_HIDDEN_PUZZZLE_HASH: [u8; 32] = hex!("e9aaa49f4
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   (c (list AGG_SIG_ME public_key (sha256tree1 delegated_puzzle))
 ///   (a delegated_puzzle delegated_puzzle_solution))
 /// )
 /// ```
 pub const P2_DELEGATED_PUZZLE: [u8; 143] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff04ffff02ff06ffff04ff02ffff04ff0bff80808080ff80808080ffff02ff0bff178080ffff04ffff01ff32ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff06ffff04ff02ffff04ff09ff80808080ffff02ff06ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b763220990873efc8ab15625ded7eae22cc11e21ef2e2f7c");
+pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] =
+    hex!("542cde70d1102cd1b763220990873efc8ab15625ded7eae22cc11e21ef2e2f7c");
 
 /// ```text
 /// ; build an M of N multisig puzzle
 /// ; coins are locked by N public keys, any M of which can delegate a sub-puzzle
-/// 
-/// 
+///
+///
 /// ; glossary of parameter names:
-/// 
+///
 /// ;  public_key_list: a list of N public keys
-/// 
+///
 /// ;  M: the M in "M of N"
-/// 
+///
 /// ;  selectors: a list up of 0s and 1s up to size N where exactly M are 1s
 /// ;     It's used to select public keys from public_key_list
-/// 
+///
 /// ;  delegated_puzzle: the puzzle signed by the M public keys
 /// ;     This puzzle must return a list of conditions
-/// 
+///
 /// ;  solution: the solution to the delegated puzzle
-/// 
-/// 
+///
+///
 /// (mod
 ///   (M public_key_list selectors delegated_puzzle solution)
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   ;; hash a tree
 ///   ;; This is used to calculate a puzzle hash given a puzzle program.
 ///   (defun sha256tree1
@@ -3637,19 +3683,19 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   ; "assert" is a macro that wraps repeated instances of "if"
 ///   ; usage: (assert A0 A1 ... An R)
 ///   ; all of A0, A1, ... An must evaluate to non-null, or an exception is raised
 ///   ; return the value of R (if we get that far)
-/// 
+///
 ///   (defmacro assert items
 ///     (if (r items)
 ///         (list if (f items) (c assert (r items)) (q . (x)))
 ///         (f items)
 ///     )
 ///   )
-/// 
+///
 ///   ; add_aggsig returns a list of conditions. It includes M AGG_SIG conditions
 ///   ;   corresponding to the given list of public keys (with the given hash)
 ///   ;   plus the conditions that come out of the delegated puzzle.
@@ -3657,7 +3703,7 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 ///   ; hash is the hash of delegated_puzzle.
 ///   ;  Yes it's redundant since we include the delegated_puzzle itself,
 ///   ;  but we don't want to recalculate the hash multiple times as its expensive to do so
-/// 
+///
 ///   (defun add_aggsig (public_key_list hash delegated_puzzle solution)
 ///     (if public_key_list
 ///         (c (list AGG_SIG_UNSAFE (f public_key_list) hash)
@@ -3666,10 +3712,10 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 ///         (a delegated_puzzle solution)
 ///     )
 ///   )
-/// 
+///
 ///   ; choose_keys takes a list of selectors and the N public keys and
 ///   ; returns a list of the M public keys chosen by the selectors
-/// 
+///
 ///   (defun choose_keys (selectors public_key_list)
 ///     (if selectors
 ///         (if (f selectors)
@@ -3678,10 +3724,10 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 ///         ()
 ///     )
 ///   )
-/// 
-/// 
+///
+///
 ///   ; count the number of non-0 values in the list of selectors and return it as an integer
-/// 
+///
 ///   (defun count_selectors (selectors)
 ///     (if selectors
 ///         (+
@@ -3691,9 +3737,9 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 ///         0
 ///     )
 ///   )
-/// 
+///
 ///   ; "solve_puzzle" is the main entry point
-/// 
+///
 ///   (defun-inline solve_puzzle (M public_key_list selectors delegated_puzzle solution)
 ///     ; make sure we have exactly M selectors
 ///     (assert (= M (count_selectors selectors))
@@ -3704,9 +3750,9 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 ///       solution)
 ///     )
 ///   )
-/// 
+///
 ///   ; main entry point
-/// 
+///
 ///   (solve_puzzle
 ///     M public_key_list
 ///     selectors delegated_puzzle solution
@@ -3714,7 +3760,8 @@ pub const P2_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("542cde70d1102cd1b7632209908
 /// )
 /// ```
 pub const P2_M_OF_N_DELEGATE_DIRECT: [u8; 453] = hex!("ff02ffff01ff02ffff03ffff09ff05ffff02ff16ffff04ff02ffff04ff17ff8080808080ffff01ff02ff0cffff04ff02ffff04ffff02ff0affff04ff02ffff04ff17ffff04ff0bff8080808080ffff04ffff02ff1effff04ff02ffff04ff2fff80808080ffff04ff2fffff04ff5fff80808080808080ffff01ff088080ff0180ffff04ffff01ffff31ff02ffff03ff05ffff01ff04ffff04ff08ffff04ff09ffff04ff0bff80808080ffff02ff0cffff04ff02ffff04ff0dffff04ff0bffff04ff17ffff04ff2fff8080808080808080ffff01ff02ff17ff2f8080ff0180ffff02ffff03ff05ffff01ff02ffff03ff09ffff01ff04ff13ffff02ff0affff04ff02ffff04ff0dffff04ff1bff808080808080ffff01ff02ff0affff04ff02ffff04ff0dffff04ff1bff808080808080ff0180ff8080ff0180ffff02ffff03ff05ffff01ff10ffff02ff16ffff04ff02ffff04ff0dff80808080ffff02ffff03ff09ffff01ff0101ff8080ff018080ff8080ff0180ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_M_OF_N_DELEGATE_DIRECT_HASH: [u8; 32] = hex!("0f199d5263ac1a62b077c159404a71abd3f9691cc57520bf1d4c5cb501504457");
+pub const P2_M_OF_N_DELEGATE_DIRECT_HASH: [u8; 32] =
+    hex!("0f199d5263ac1a62b077c159404a71abd3f9691cc57520bf1d4c5cb501504457");
 
 /// ```text
 /// (mod
@@ -3725,10 +3772,10 @@ pub const P2_M_OF_N_DELEGATE_DIRECT_HASH: [u8; 32] = hex!("0f199d5263ac1a62b077c
 ///     parent_amount
 ///     parent_solution
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   (c
 ///     (list ASSERT_MY_PARENT_ID
 ///       (calculate_coin_id parent_parent_id (a MORPHER (sha256tree parent_inner_puz)) parent_amount)
@@ -3738,21 +3785,22 @@ pub const P2_M_OF_N_DELEGATE_DIRECT_HASH: [u8; 32] = hex!("0f199d5263ac1a62b077c
 /// )
 /// ```
 pub const P2_PARENT: [u8; 242] = hex!("ff02ffff01ff04ffff04ff08ffff04ffff02ff0affff04ff02ffff04ff0bffff04ffff02ff05ffff02ff0effff04ff02ffff04ff17ff8080808080ffff04ff2fff808080808080ff808080ffff02ff17ff5f8080ffff04ffff01ffff4720ffff02ffff03ffff22ffff09ffff0dff0580ff0c80ffff09ffff0dff0b80ff0c80ffff15ff17ffff0181ff8080ffff01ff0bff05ff0bff1780ffff01ff088080ff0180ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff0effff04ff02ffff04ff09ff80808080ffff02ff0effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_PARENT_HASH: [u8; 32] = hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1e0beb55b1a8b9cad9bbff4e5f22");
+pub const P2_PARENT_HASH: [u8; 32] =
+    hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1e0beb55b1a8b9cad9bbff4e5f22");
 
 /// ```text
 /// ;; Works with p2_singleton_via_delegated_puzzle
 /// ;; When we have many p2_singleton coins and want to aggregate them together
-/// 
+///
 /// ;; all coins make announcements of their puzhash, amount, and ID
 /// ;; the aggregator coin (the one creating the output) creates an announcement of the ID of each merge coin
 /// ;; each merge coin asserts that the aggregator has an announcement of their (the merge coin's) ID
 /// ;; The merge coins each create an announcement of 0 (equivalent to announcing their coin ID)
 /// ;; The aggregator asserts that there is a 0 announcement from each of the merge coins
-/// 
+///
 /// ;; merge coin announces 0 <-> aggregator asserts that merge coin ID announces 0
 /// ;; aggregator announces merge coin ID <-> merge coin asserts that aggregator announces my_id
-/// 
+///
 /// (mod
 ///   (
 ///     my_id
@@ -3761,11 +3809,11 @@ pub const P2_PARENT_HASH: [u8; 32] = hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1
 ///     list_of_parent_puzhash_amounts  ; list of (parent_id puzhash amount) for the merge
 ///     output_parent_amount  ; (parent_id amount) of the coin creating the output
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include *standard-cl-21*)
-/// 
+///
 ///   (defun cons_announcements_to_output (coin_id output)
 ///     (c
 ///       (list ASSERT_COIN_ANNOUNCEMENT (sha256 coin_id 0))
@@ -3775,7 +3823,7 @@ pub const P2_PARENT_HASH: [u8; 32] = hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   (defun for_parent_puzhash_amounts
 ///     (
 ///       my_puzhash
@@ -3793,7 +3841,7 @@ pub const P2_PARENT_HASH: [u8; 32] = hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline give_self_to_merge (my_id my_puzhash (@ output_info (parent amount)))
 ///     ;; Coins being merged are asserting the output coin id, and insisting it has the same puzhash as them
 ///     ;; This ensures that the puzzle which issues the CREATE_COIN condition is the same as this puzzle.
@@ -3802,9 +3850,9 @@ pub const P2_PARENT_HASH: [u8; 32] = hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1
 ///       (list ASSERT_COIN_ANNOUNCEMENT (sha256 (calculate_coin_id parent my_puzhash amount) my_id))
 ///     )
 ///   )
-/// 
-/// 
-/// 
+///
+///
+///
 ///   (c
 ///     (list ASSERT_MY_AMOUNT my_amount)
 ///     (c
@@ -3820,18 +3868,19 @@ pub const P2_PARENT_HASH: [u8; 32] = hex!("b10ce2d0b18dcf8c21ddfaf55d9b9f0adcbf1
 ///       )
 ///     )
 ///   )
-/// 
+///
 /// )
 /// ```
 pub const P2_SINGLETON_AGGREGATOR: [u8; 574] = hex!("ff02ffff01ff04ffff04ffff0149ffff04ff17ffff01808080ffff04ffff04ffff0148ffff04ff0bffff01808080ffff04ffff04ffff0146ffff04ff05ffff01808080ffff02ffff03ff2fffff01ff02ffff01ff02ff0effff04ff02ffff04ff0bffff04ff2fffff04ff17ff808080808080ff0180ffff01ff02ffff01ff04ffff04ffff013cffff04ffff0180ffff01808080ffff04ffff04ffff013dffff04ffff0bffff02ff04ffff04ff02ffff04ffff05ff5f80ffff04ff0bffff04ffff05ffff06ff5f8080ff808080808080ff0580ffff01808080ffff01808080ff018080ff0180808080ffff04ffff01ffff02ffff03ffff22ffff09ffff0dff0580ffff012080ffff09ffff0dff0b80ffff012080ffff15ff17ffff0181ff8080ffff01ff02ffff01ff0bff05ff0bff1780ff0180ffff01ff02ffff01ff0880ff018080ff0180ffff04ffff04ffff013dffff04ffff0bff05ff8080ff808080ffff04ffff04ffff013cffff04ff05ff808080ff0b8080ff02ffff03ff0bffff01ff02ffff01ff02ff0affff04ff02ffff04ffff02ff04ffff04ff02ffff04ff23ffff04ff53ffff04ff8200b3ff808080808080ffff04ffff02ff0effff04ff02ffff04ff05ffff04ff1bffff04ffff10ff17ff8200b380ff808080808080ff8080808080ff0180ffff01ff02ffff01ff04ffff04ffff0152ffff04ffff0105ffff01808080ffff04ffff04ffff0133ffff04ff05ffff04ff17ffff04ffff04ff05ffff018080ffff018080808080ffff01808080ff018080ff0180ff018080");
-pub const P2_SINGLETON_AGGREGATOR_HASH: [u8; 32] = hex!("f79a31fcfe3736cc75720617b4cdcb4376b4b8f8f71108617710612b909a4924");
+pub const P2_SINGLETON_AGGREGATOR_HASH: [u8; 32] =
+    hex!("f79a31fcfe3736cc75720617b4cdcb4376b4b8f8f71108617710612b909a4924");
 
 /// ```text
 /// (mod (SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH SECONDS_DELAY DELAYED_PUZZLE_HASH p1 my_id)
-/// 
+///
 ///   ;; This puzzle has two escape conditions: the regular "claim via singleton", and the
 ///   ;; delayed "claim via puzzle hash", delayed by a fixed number of seconds.
-/// 
+///
 ///   ; SINGLETON_MOD_HASH is the mod-hash for the singleton_top_layer puzzle
 ///   ; LAUNCHER_ID is the ID of the singleton we are committed to paying to
 ///   ; LAUNCHER_PUZZLE_HASH is the puzzle hash of the launcher
@@ -3841,10 +3890,10 @@ pub const P2_SINGLETON_AGGREGATOR_HASH: [u8; 32] = hex!("f79a31fcfe3736cc7572061
 ///   ; p1's meaning changes depending upon which case we're using
 ///   ; if we are paying to singleton then p1 is singleton_inner_puzzle_hash
 ///   ; if we are running the delayed case then p1 is the amount to output
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   ;; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline delayed_spend (SECONDS_DELAY DELAYED_PUZZLE_HASH amount)
@@ -3854,7 +3903,7 @@ pub const P2_SINGLETON_AGGREGATOR_HASH: [u8; 32] = hex!("f79a31fcfe3736cc7572061
 ///       (list ASSERT_MY_AMOUNT amount)
 ///     )
 ///   )
-/// 
+///
 ///   ;; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH inner_puzzle_hash)
@@ -3863,14 +3912,14 @@ pub const P2_SINGLETON_AGGREGATOR_HASH: [u8; 32] = hex!("f79a31fcfe3736cc7572061
 ///       (sha256tree (c SINGLETON_MOD_HASH (c LAUNCHER_ID LAUNCHER_PUZZLE_HASH)))
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline claim_rewards (SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH singleton_inner_puzzle_hash my_id)
 ///     (list
 ///       (list ASSERT_PUZZLE_ANNOUNCEMENT (sha256 (calculate_full_puzzle_hash SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH singleton_inner_puzzle_hash) my_id))
 ///       (list CREATE_COIN_ANNOUNCEMENT '$')
 ///     (list ASSERT_MY_COIN_ID my_id))
 ///   )
-/// 
+///
 ///   ; main
 ///   (if my_id
 ///       (claim_rewards SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH p1 my_id)
@@ -3879,14 +3928,15 @@ pub const P2_SINGLETON_AGGREGATOR_HASH: [u8; 32] = hex!("f79a31fcfe3736cc7572061
 /// )
 /// ```
 pub const P2_SINGLETON_OR_DELAYED_PUZHASH: [u8; 496] = hex!("ff02ffff01ff02ffff03ff82017fffff01ff04ffff04ff38ffff04ffff0bffff02ff2effff04ff02ffff04ff05ffff04ff81bfffff04ffff02ff3effff04ff02ffff04ffff04ff05ffff04ff0bff178080ff80808080ff808080808080ff82017f80ff808080ffff04ffff04ff3cffff01ff248080ffff04ffff04ff28ffff04ff82017fff808080ff80808080ffff01ff04ffff04ff24ffff04ff2fff808080ffff04ffff04ff2cffff04ff5fffff04ff81bfff80808080ffff04ffff04ff10ffff04ff81bfff808080ff8080808080ff0180ffff04ffff01ffffff49ff463fffff5002ff333cffff04ff0101ffff02ff02ffff03ff05ffff01ff02ff36ffff04ff02ffff04ff0dffff04ffff0bff26ffff0bff2aff1280ffff0bff26ffff0bff26ffff0bff2aff3a80ff0980ffff0bff26ff0bffff0bff2aff8080808080ff8080808080ffff010b80ff0180ffff0bff26ffff0bff2aff3480ffff0bff26ffff0bff26ffff0bff2aff3a80ff0580ffff0bff26ffff02ff36ffff04ff02ffff04ff07ffff04ffff0bff2aff2a80ff8080808080ffff0bff2aff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff3effff04ff02ffff04ff09ff80808080ffff02ff3effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_SINGLETON_OR_DELAYED_PUZHASH_HASH: [u8; 32] = hex!("adb656e0211e2ab4f42069a4c5efc80dc907e7062be08bf1628c8e5b6d94d25b");
+pub const P2_SINGLETON_OR_DELAYED_PUZHASH_HASH: [u8; 32] =
+    hex!("adb656e0211e2ab4f42069a4c5efc80dc907e7062be08bf1628c8e5b6d94d25b");
 
 /// ```text
 /// ;; This puzzle holds an amount which can be spent via two spend paths:
 /// ;; 1. to a delegated puzzle provided our owner singleton creates a puzzle announcement of this coin's id and the delegated puzzle.
 /// ;; 2. coins of this puzzle type can be merged together without the owner singleton's permission. This spend type is useful for DAOs which use this puzzle to custody funds and want to keep a reasonable limit on the number of coins tracked by DAO wallets.
 /// ;; The AGGREGATOR_PUZZLE is curried in to preserve generality and so its logic can be updated without requiring any change to the spend to delegated path. Optionally the Aggregator puzzle can be `(x)` to close off this spend path
-/// 
+///
 /// (mod (
 ///     SINGLETON_STRUCT
 ///     AGGREGATOR_PUZZLE
@@ -3896,17 +3946,17 @@ pub const P2_SINGLETON_OR_DELAYED_PUZHASH_HASH: [u8; 32] = hex!("adb656e0211e2ab
 ///     delegated_solution
 ///     my_id
 ///   )
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_STRUCT singleton_inner_puzhash)
 ///     (puzzle-hash-of-curried-function (f SINGLETON_STRUCT)
 ///       singleton_inner_puzhash
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (if aggregator_solution
 ///       ; we are merging coins to make a larger coin
 ///       (a AGGREGATOR_PUZZLE aggregator_solution)
@@ -3931,20 +3981,21 @@ pub const P2_SINGLETON_OR_DELAYED_PUZHASH_HASH: [u8; 32] = hex!("adb656e0211e2ab
 /// )
 /// ```
 pub const P2_SINGLETON_VIA_DELEGATED_PUZZLE: [u8; 474] = hex!("ff02ffff01ff02ffff03ff17ffff01ff02ff0bff1780ffff01ff04ffff04ff18ffff04ffff0bffff02ff2effff04ff02ffff04ff09ffff04ff2fffff04ffff02ff3effff04ff02ffff04ff05ff80808080ff808080808080ffff02ff3effff04ff02ffff04ffff04ff82017fffff04ffff02ff3effff04ff02ffff04ff5fff80808080ff808080ff8080808080ff808080ffff04ffff04ff2cffff01ff248080ffff04ffff04ff10ffff04ff82017fff808080ffff02ff5fff81bf8080808080ff0180ffff04ffff01ffffff463fff02ff3c04ffff01ff0102ffff02ffff03ff05ffff01ff02ff16ffff04ff02ffff04ff0dffff04ffff0bff3affff0bff12ff3c80ffff0bff3affff0bff3affff0bff12ff2a80ff0980ffff0bff3aff0bffff0bff12ff8080808080ff8080808080ffff010b80ff0180ffff0bff3affff0bff12ff1480ffff0bff3affff0bff3affff0bff12ff2a80ff0580ffff0bff3affff02ff16ffff04ff02ffff04ff07ffff04ffff0bff12ff1280ff8080808080ffff0bff12ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff3effff04ff02ffff04ff09ff80808080ffff02ff3effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_SINGLETON_VIA_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("9590eaa169e45b655a31d3c06bbd355a3e2b2e3e410d3829748ce08ab249c39e");
+pub const P2_SINGLETON_VIA_DELEGATED_PUZZLE_HASH: [u8; 32] =
+    hex!("9590eaa169e45b655a31d3c06bbd355a3e2b2e3e410d3829748ce08ab249c39e");
 
 /// ```text
 /// (mod (SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH singleton_inner_puzzle_hash my_id)
-/// 
+///
 ///   ; SINGLETON_MOD_HASH is the mod-hash for the singleton_top_layer puzzle
 ///   ; LAUNCHER_ID is the ID of the singleton we are committed to paying to
 ///   ; LAUNCHER_PUZZLE_HASH is the puzzle hash of the launcher
 ///   ; singleton_inner_puzzle_hash is the innerpuzzlehash for our singleton at the current time
 ///   ; my_id is the coin_id of the coin that this puzzle is locked into
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
-/// 
+///
 ///   ;; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH inner_puzzle_hash)
@@ -3953,20 +4004,21 @@ pub const P2_SINGLETON_VIA_DELEGATED_PUZZLE_HASH: [u8; 32] = hex!("9590eaa169e45
 ///       (sha256tree (c SINGLETON_MOD_HASH (c LAUNCHER_ID LAUNCHER_PUZZLE_HASH)))
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline claim_rewards (SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH singleton_inner_puzzle_hash my_id)
 ///     (list
 ///       (list ASSERT_PUZZLE_ANNOUNCEMENT (sha256 (calculate_full_puzzle_hash SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH singleton_inner_puzzle_hash) my_id))
 ///       (list CREATE_COIN_ANNOUNCEMENT '$')
 ///     (list ASSERT_MY_COIN_ID my_id))
 ///   )
-/// 
+///
 ///   ; main
 ///   (claim_rewards SINGLETON_MOD_HASH LAUNCHER_ID LAUNCHER_PUZZLE_HASH singleton_inner_puzzle_hash my_id)
 /// )
 /// ```
 pub const P2_SINGLETON: [u8; 403] = hex!("ff02ffff01ff04ffff04ff18ffff04ffff0bffff02ff2effff04ff02ffff04ff05ffff04ff2fffff04ffff02ff3effff04ff02ffff04ffff04ff05ffff04ff0bff178080ff80808080ff808080808080ff5f80ff808080ffff04ffff04ff2cffff01ff248080ffff04ffff04ff10ffff04ff5fff808080ff80808080ffff04ffff01ffffff463fff02ff3c04ffff01ff0102ffff02ffff03ff05ffff01ff02ff16ffff04ff02ffff04ff0dffff04ffff0bff3affff0bff12ff3c80ffff0bff3affff0bff3affff0bff12ff2a80ff0980ffff0bff3aff0bffff0bff12ff8080808080ff8080808080ffff010b80ff0180ffff0bff3affff0bff12ff1480ffff0bff3affff0bff3affff0bff12ff2a80ff0580ffff0bff3affff02ff16ffff04ff02ffff04ff07ffff04ffff0bff12ff1280ff8080808080ffff0bff12ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff3effff04ff02ffff04ff09ff80808080ffff02ff3effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const P2_SINGLETON_HASH: [u8; 32] = hex!("40f828d8dd55603f4ff9fbf6b73271e904e69406982f4fbefae2c8dcceaf9834");
+pub const P2_SINGLETON_HASH: [u8; 32] =
+    hex!("40f828d8dd55603f4ff9fbf6b73271e904e69406982f4fbefae2c8dcceaf9834");
 
 /// ```text
 /// (mod notarized_payments
@@ -3976,17 +4028,17 @@ pub const P2_SINGLETON_HASH: [u8; 32] = hex!("40f828d8dd55603f4ff9fbf6b73271e904
 ///   ;; and a `(CREATE_PUZZLE_ANNOUNCEMENT (sha256tree notarized_coin_payment))` announcement
 ///   ;; The idea is the other side of this trade requires observing the announcement from a
 ///   ;; `settlement_payments` puzzle hash as a condition of one or more coin spends.
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defun sha256tree (TREE)
 ///     (if (l TREE)
 ///         (sha256 2 (sha256tree (f TREE)) (sha256tree (r TREE)))
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   (defun create_coins_for_payment (payment_params so_far)
 ///     (if payment_params
 ///         (assert (> (f (r (f payment_params))) 0)  ; assert the amount is positive
@@ -3996,37 +4048,38 @@ pub const P2_SINGLETON_HASH: [u8; 32] = hex!("40f828d8dd55603f4ff9fbf6b73271e904
 ///         so_far
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline create_announcement_for_payment (notarized_payment)
 ///     (list CREATE_PUZZLE_ANNOUNCEMENT
 ///     (sha256tree notarized_payment))
 ///   )
-/// 
+///
 ///   (defun-inline augment_condition_list (notarized_payment so_far)
 ///     (c
 ///       (create_announcement_for_payment notarized_payment)
 ///       (create_coins_for_payment (r notarized_payment) so_far)
 ///     )
 ///   )
-/// 
+///
 ///   (defun construct_condition_list (notarized_payments)
 ///     (if notarized_payments
 ///         (augment_condition_list (f notarized_payments) (construct_condition_list (r notarized_payments)))
 ///         ()
 ///     )
 ///   )
-/// 
+///
 ///   (construct_condition_list notarized_payments)
 /// )
 /// ```
 pub const SETTLEMENT_PAYMENT: [u8; 293] = hex!("ff02ffff01ff02ff0affff04ff02ffff04ff03ff80808080ffff04ffff01ffff333effff02ffff03ff05ffff01ff04ffff04ff0cffff04ffff02ff1effff04ff02ffff04ff09ff80808080ff808080ffff02ff16ffff04ff02ffff04ff19ffff04ffff02ff0affff04ff02ffff04ff0dff80808080ff808080808080ff8080ff0180ffff02ffff03ff05ffff01ff02ffff03ffff15ff29ff8080ffff01ff04ffff04ff08ff0980ffff02ff16ffff04ff02ffff04ff0dffff04ff0bff808080808080ffff01ff088080ff0180ffff010b80ff0180ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const SETTLEMENT_PAYMENT_HASH: [u8; 32] = hex!("cfbfdeed5c4ca2de3d0bf520b9cb4bb7743a359bd2e6a188d19ce7dffc21d3e7");
+pub const SETTLEMENT_PAYMENT_HASH: [u8; 32] =
+    hex!("cfbfdeed5c4ca2de3d0bf520b9cb4bb7743a359bd2e6a188d19ce7dffc21d3e7");
 
 /// ```text
 /// (mod (singleton_full_puzzle_hash amount key_value_list)
-/// 
+///
 ///   (include condition_codes.clib)
-/// 
+///
 ///   ; takes a lisp tree and returns the hash of it
 ///   (defun sha256tree1 (TREE)
 ///     (if (l TREE)
@@ -4034,37 +4087,38 @@ pub const SETTLEMENT_PAYMENT_HASH: [u8; 32] = hex!("cfbfdeed5c4ca2de3d0bf520b9cb
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   ; main
 ///   (list (list CREATE_COIN singleton_full_puzzle_hash amount)
 ///   (list CREATE_COIN_ANNOUNCEMENT (sha256tree1 (list singleton_full_puzzle_hash amount key_value_list))))
 /// )
 /// ```
 pub const SINGLETON_LAUNCHER: [u8; 175] = hex!("ff02ffff01ff04ffff04ff04ffff04ff05ffff04ff0bff80808080ffff04ffff04ff0affff04ffff02ff0effff04ff02ffff04ffff04ff05ffff04ff0bffff04ff17ff80808080ff80808080ff808080ff808080ffff04ffff01ff33ff3cff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff0effff04ff02ffff04ff09ff80808080ffff02ff0effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
-pub const SINGLETON_LAUNCHER_HASH: [u8; 32] = hex!("eff07522495060c066f66f32acc2a77e3a3e737aca8baea4d1a64ea4cdc13da9");
+pub const SINGLETON_LAUNCHER_HASH: [u8; 32] =
+    hex!("eff07522495060c066f66f32acc2a77e3a3e737aca8baea4d1a64ea4cdc13da9");
 
 /// ```text
 /// (mod (SINGLETON_STRUCT INNER_PUZZLE lineage_proof my_amount inner_solution)
-/// 
+///
 ///   ;; SINGLETON_STRUCT = (MOD_HASH . (LAUNCHER_ID . LAUNCHER_PUZZLE_HASH))
-/// 
+///
 ///   ; SINGLETON_STRUCT, INNER_PUZZLE are curried in by the wallet
-/// 
+///
 ///   ; EXAMPLE SOLUTION '(0xfadeddab 0xdeadbeef 1 (0xdeadbeef 200) 50 ((51 0xfadeddab 100) (60 "trash") (51 deadbeef 0)))'
-/// 
-/// 
+///
+///
 ///   ; This puzzle is a wrapper around an inner smart puzzle which guarantees uniqueness.
 ///   ; It takes its singleton identity from a coin with a launcher puzzle which guarantees that it is unique.
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)  ; also imports the constant ONE == 1
 ///   (include singleton_truths.clib)
 ///   (include utility_macros.clib)
-/// 
+///
 ///   (defun-inline mod_hash_for_singleton_struct (SINGLETON_STRUCT) (f SINGLETON_STRUCT))
 ///   (defun-inline launcher_id_for_singleton_struct (SINGLETON_STRUCT) (f (r SINGLETON_STRUCT)))
 ///   (defun-inline launcher_puzzle_hash_for_singleton_struct (SINGLETON_STRUCT) (r (r SINGLETON_STRUCT)))
-/// 
+///
 ///   ;; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_STRUCT inner_puzzle_hash)
@@ -4073,24 +4127,24 @@ pub const SINGLETON_LAUNCHER_HASH: [u8; 32] = hex!("eff07522495060c066f66f32acc2
 ///       (sha256tree SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline morph_condition (condition SINGLETON_STRUCT)
 ///     (c (f condition) (c (calculate_full_puzzle_hash SINGLETON_STRUCT (f (r condition))) (r (r condition))))
 ///   )
-/// 
+///
 ///   (defun is_odd_create_coin (condition)
 ///     (and (= (f condition) CREATE_COIN) (logand (f (r (r condition))) 1))
 ///   )
-/// 
+///
 ///   ; Assert exactly one output with odd value exists - ignore it if value is -113
-/// 
+///
 ///   ;; this function iterates over the output conditions from the inner puzzle & solution
 ///   ;; and both checks that exactly one unique singleton child is created (with odd valued output),
 ///   ;; and wraps the inner puzzle with this same singleton wrapper puzzle
 ///   ;;
 ///   ;; The special case where the output value is -113 means a child singleton is intentionally
 ///   ;; *NOT* being created, thus forever ending this singleton's existence
-/// 
+///
 ///   (defun check_and_morph_conditions_for_singleton (SINGLETON_STRUCT conditions has_odd_output_been_found)
 ///     (if conditions
 ///         ; check if it's an odd create coin
@@ -4110,7 +4164,7 @@ pub const SINGLETON_LAUNCHER_HASH: [u8; 32] = hex!("eff07522495060c066f66f32acc2
 ///         (assert has_odd_output_been_found ())
 ///     )
 ///   )
-/// 
+///
 ///   ; assert that either the lineage proof is for a parent singleton, or, if it's for the launcher, verify it matched our launcher ID
 ///   ; then return a condition asserting it actually is our parent ID
 ///   (defun verify_lineage_proof (SINGLETON_STRUCT parent_id is_not_launcher)
@@ -4119,9 +4173,9 @@ pub const SINGLETON_LAUNCHER_HASH: [u8; 32] = hex!("eff07522495060c066f66f32acc2
 ///       (list ASSERT_MY_PARENT_ID parent_id)
 ///     )
 ///   )
-/// 
+///
 ///   ; main
-/// 
+///
 ///   ; if our value is not an odd amount then we are invalid
 ///   (assert (logand my_amount ONE)
 ///     ; then
@@ -4153,25 +4207,26 @@ pub const SINGLETON_LAUNCHER_HASH: [u8; 32] = hex!("eff07522495060c066f66f32acc2
 /// )
 /// ```
 pub const SINGLETON_TOP_LAYER_V1_1: [u8; 967] = hex!("ff02ffff01ff02ffff03ffff18ff2fff3480ffff01ff04ffff04ff20ffff04ff2fff808080ffff04ffff02ff3effff04ff02ffff04ff05ffff04ffff02ff2affff04ff02ffff04ff27ffff04ffff02ffff03ff77ffff01ff02ff36ffff04ff02ffff04ff09ffff04ff57ffff04ffff02ff2effff04ff02ffff04ff05ff80808080ff808080808080ffff011d80ff0180ffff04ffff02ffff03ff77ffff0181b7ffff015780ff0180ff808080808080ffff04ff77ff808080808080ffff02ff3affff04ff02ffff04ff05ffff04ffff02ff0bff5f80ffff01ff8080808080808080ffff01ff088080ff0180ffff04ffff01ffffffff4947ff0233ffff0401ff0102ffffff20ff02ffff03ff05ffff01ff02ff32ffff04ff02ffff04ff0dffff04ffff0bff3cffff0bff34ff2480ffff0bff3cffff0bff3cffff0bff34ff2c80ff0980ffff0bff3cff0bffff0bff34ff8080808080ff8080808080ffff010b80ff0180ffff02ffff03ffff22ffff09ffff0dff0580ff2280ffff09ffff0dff0b80ff2280ffff15ff17ffff0181ff8080ffff01ff0bff05ff0bff1780ffff01ff088080ff0180ff02ffff03ff0bffff01ff02ffff03ffff02ff26ffff04ff02ffff04ff13ff80808080ffff01ff02ffff03ffff20ff1780ffff01ff02ffff03ffff09ff81b3ffff01818f80ffff01ff02ff3affff04ff02ffff04ff05ffff04ff1bffff04ff34ff808080808080ffff01ff04ffff04ff23ffff04ffff02ff36ffff04ff02ffff04ff09ffff04ff53ffff04ffff02ff2effff04ff02ffff04ff05ff80808080ff808080808080ff738080ffff02ff3affff04ff02ffff04ff05ffff04ff1bffff04ff34ff8080808080808080ff0180ffff01ff088080ff0180ffff01ff04ff13ffff02ff3affff04ff02ffff04ff05ffff04ff1bffff04ff17ff8080808080808080ff0180ffff01ff02ffff03ff17ff80ffff01ff088080ff018080ff0180ffffff02ffff03ffff09ff09ff3880ffff01ff02ffff03ffff18ff2dffff010180ffff01ff0101ff8080ff0180ff8080ff0180ff0bff3cffff0bff34ff2880ffff0bff3cffff0bff3cffff0bff34ff2c80ff0580ffff0bff3cffff02ff32ffff04ff02ffff04ff07ffff04ffff0bff34ff3480ff8080808080ffff0bff34ff8080808080ffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff2effff04ff02ffff04ff09ff80808080ffff02ff2effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ffff03ffff21ff17ffff09ff0bff158080ffff01ff04ff30ffff04ff0bff808080ffff01ff088080ff0180ff018080");
-pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb0906b2dc6247bbc4cf608f58345d173adb63e8b47c9f");
+pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] =
+    hex!("7faa3253bfddd1e0decb0906b2dc6247bbc4cf608f58345d173adb63e8b47c9f");
 
 /// ```text
 /// (mod (SINGLETON_STRUCT INNER_PUZZLE lineage_proof my_amount inner_solution)
-/// 
+///
 ///   ;; SINGLETON_STRUCT = (MOD_HASH . (LAUNCHER_ID . LAUNCHER_PUZZLE_HASH))
-/// 
+///
 ///   ; SINGLETON_STRUCT, INNER_PUZZLE are curried in by the wallet
-/// 
+///
 ///   ; EXAMPLE SOLUTION '(0xfadeddab 0xdeadbeef 1 (0xdeadbeef 200) 50 ((51 0xfadeddab 100) (60 "trash") (51 deadbeef 0)))'
-/// 
-/// 
+///
+///
 ///   ; This puzzle is a wrapper around an inner smart puzzle which guarantees uniqueness.
 ///   ; It takes its singleton identity from a coin with a launcher puzzle which guarantees that it is unique.
-/// 
+///
 ///   (include condition_codes.clib)
 ///   (include curry-and-treehash.clib)
 ///   (include singleton_truths.clib)
-/// 
+///
 ///   ; takes a lisp tree and returns the hash of it
 ///   (defun sha256tree1 (TREE)
 ///     (if (l TREE)
@@ -4179,23 +4234,23 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///         (sha256 1 TREE)
 ///     )
 ///   )
-/// 
+///
 ///   ; "assert" is a macro that wraps repeated instances of "if"
 ///   ; usage: (assert A0 A1 ... An R)
 ///   ; all of A0, A1, ... An must evaluate to non-null, or an exception is raised
 ///   ; return the value of R (if we get that far)
-/// 
+///
 ///   (defmacro assert items
 ///     (if (r items)
 ///         (list if (f items) (c assert (r items)) (q . (x)))
 ///         (f items)
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline mod_hash_for_singleton_struct (SINGLETON_STRUCT) (f SINGLETON_STRUCT))
 ///   (defun-inline launcher_id_for_singleton_struct (SINGLETON_STRUCT) (f (r SINGLETON_STRUCT)))
 ///   (defun-inline launcher_puzzle_hash_for_singleton_struct (SINGLETON_STRUCT) (r (r SINGLETON_STRUCT)))
-/// 
+///
 ///   ;; return the full puzzlehash for a singleton with the innerpuzzle curried in
 ///   ; puzzle-hash-of-curried-function is imported from curry-and-treehash.clib
 ///   (defun-inline calculate_full_puzzle_hash (SINGLETON_STRUCT inner_puzzle_hash)
@@ -4204,14 +4259,14 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///       (sha256tree1 SINGLETON_STRUCT)
 ///     )
 ///   )
-/// 
+///
 ///   ; assembles information from the solution to create our own full ID including asserting our parent is a singleton
 ///   (defun create_my_ID (SINGLETON_STRUCT full_puzzle_hash parent_parent parent_inner_puzzle_hash parent_amount my_amount)
 ///     (sha256 (sha256 parent_parent (calculate_full_puzzle_hash SINGLETON_STRUCT parent_inner_puzzle_hash) parent_amount)
 ///       full_puzzle_hash
 ///     my_amount)
 ///   )
-/// 
+///
 ///   ;; take a boolean and a non-empty list of conditions
 ///   ;; strip off the first condition if a boolean is set
 ///   ;; this is used to remove `(CREATE_COIN xxx -113)`
@@ -4222,11 +4277,11 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///         condition_list
 ///     )
 ///   )
-/// 
+///
 ///   (defun-inline morph_condition (condition SINGLETON_STRUCT)
 ///     (list (f condition) (calculate_full_puzzle_hash SINGLETON_STRUCT (f (r condition))) (f (r (r condition))))
 ///   )
-/// 
+///
 ///   ;; return the value of the coin created if this is a `CREATE_COIN` condition, or 0 otherwise
 ///   (defun-inline created_coin_value_or_0 (condition)
 ///     (if (= (f condition) CREATE_COIN)
@@ -4234,7 +4289,7 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///         0
 ///     )
 ///   )
-/// 
+///
 ///   ;; Returns a (bool . bool)
 ///   (defun odd_cons_m113 (output_amount)
 ///     (c
@@ -4242,16 +4297,16 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///       (= output_amount -113)  ;; is it the escape value?
 ///     )
 ///   )
-/// 
+///
 ///   ; Assert exactly one output with odd value exists - ignore it if value is -113
-/// 
+///
 ///   ;; this function iterates over the output conditions from the inner puzzle & solution
 ///   ;; and both checks that exactly one unique singleton child is created (with odd valued output),
 ///   ;; and wraps the inner puzzle with this same singleton wrapper puzzle
 ///   ;;
 ///   ;; The special case where the output value is -113 means a child singleton is intentionally
 ///   ;; *NOT* being created, thus forever ending this singleton's existence
-/// 
+///
 ///   (defun check_and_morph_conditions_for_singleton (SINGLETON_STRUCT conditions has_odd_output_been_found)
 ///     (if conditions
 ///         (morph_next_condition SINGLETON_STRUCT conditions has_odd_output_been_found (odd_cons_m113 (created_coin_value_or_0 (f conditions))))
@@ -4261,7 +4316,7 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///         )
 ///     )
 ///   )
-/// 
+///
 ///   ;; a continuation of `check_and_morph_conditions_for_singleton` with booleans `is_output_odd` and `is_output_m113`
 ///   ;; precalculated
 ///   (defun morph_next_condition (SINGLETON_STRUCT conditions has_odd_output_been_found (is_output_odd . is_output_m113))
@@ -4278,17 +4333,17 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///       )
 ///     )
 ///   )
-/// 
+///
 ///   ; this final stager asserts our ID
 ///   ; it also runs the innerpuz with the innersolution with the "truths" added
 ///   ; it then passes that output conditions from the innerpuz to the morph conditions function
 ///   (defun stager_three (SINGLETON_STRUCT lineage_proof my_id full_puzhash innerpuzhash my_amount INNER_PUZZLE inner_solution)
 ///     (c (list ASSERT_MY_COIN_ID my_id) (check_and_morph_conditions_for_singleton SINGLETON_STRUCT (a INNER_PUZZLE (c (truth_data_to_truth_struct my_id full_puzhash innerpuzhash my_amount lineage_proof SINGLETON_STRUCT) inner_solution)) 0))
 ///   )
-/// 
+///
 ///   ; this checks whether we are an eve spend or not and calculates our full coin ID appropriately and passes it on to the final stager
 ///   ; if we are the eve spend it also adds the additional checks that our parent's puzzle is the standard launcher format and that out parent ID is the same as our singleton ID
-/// 
+///
 ///   (defun stager_two (SINGLETON_STRUCT lineage_proof full_puzhash innerpuzhash my_amount INNER_PUZZLE inner_solution)
 ///     (stager_three
 ///       SINGLETON_STRUCT
@@ -4317,15 +4372,15 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 ///       inner_solution
 ///     )
 ///   )
-/// 
+///
 ///   ; this calculates our current full puzzle hash and passes it to stager two
 ///   (defun stager_one (SINGLETON_STRUCT lineage_proof my_innerpuzhash my_amount INNER_PUZZLE inner_solution)
 ///     (stager_two SINGLETON_STRUCT lineage_proof (calculate_full_puzzle_hash SINGLETON_STRUCT my_innerpuzhash) my_innerpuzhash my_amount INNER_PUZZLE inner_solution)
 ///   )
-/// 
-/// 
+///
+///
 ///   ; main
-/// 
+///
 ///   ; if our value is not an odd amount then we are invalid
 ///   ; this calculates my_innerpuzhash and passes all values to stager_one
 ///   (if (logand my_amount 1)
@@ -4335,4 +4390,5 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] = hex!("7faa3253bfddd1e0decb09
 /// )
 /// ```
 pub const SINGLETON_TOP_LAYER: [u8; 1168] = hex!("ff02ffff01ff02ffff03ffff18ff2fffff010180ffff01ff02ff36ffff04ff02ffff04ff05ffff04ff17ffff04ffff02ff26ffff04ff02ffff04ff0bff80808080ffff04ff2fffff04ff0bffff04ff5fff808080808080808080ffff01ff088080ff0180ffff04ffff01ffffffff4602ff3304ffff0101ff02ffff02ffff03ff05ffff01ff02ff5cffff04ff02ffff04ff0dffff04ffff0bff2cffff0bff24ff3880ffff0bff2cffff0bff2cffff0bff24ff3480ff0980ffff0bff2cff0bffff0bff24ff8080808080ff8080808080ffff010b80ff0180ff02ffff03ff0bffff01ff02ff32ffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ffff02ff2affff04ff02ffff04ffff02ffff03ffff09ff23ff2880ffff0181b3ff8080ff0180ff80808080ff80808080808080ffff01ff02ffff03ff17ff80ffff01ff088080ff018080ff0180ffffffff0bffff0bff17ffff02ff3affff04ff02ffff04ff09ffff04ff2fffff04ffff02ff26ffff04ff02ffff04ff05ff80808080ff808080808080ff5f80ff0bff81bf80ff02ffff03ffff20ffff22ff4fff178080ffff01ff02ff7effff04ff02ffff04ff6fffff04ffff04ffff02ffff03ff4fffff01ff04ff23ffff04ffff02ff3affff04ff02ffff04ff09ffff04ff53ffff04ffff02ff26ffff04ff02ffff04ff05ff80808080ff808080808080ffff04ff81b3ff80808080ffff011380ff0180ffff02ff7cffff04ff02ffff04ff05ffff04ff1bffff04ffff21ff4fff1780ff80808080808080ff8080808080ffff01ff088080ff0180ffff04ffff09ffff18ff05ffff010180ffff010180ffff09ff05ffff01818f8080ff0bff2cffff0bff24ff3080ffff0bff2cffff0bff2cffff0bff24ff3480ff0580ffff0bff2cffff02ff5cffff04ff02ffff04ff07ffff04ffff0bff24ff2480ff8080808080ffff0bff24ff8080808080ffffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff26ffff04ff02ffff04ff09ff80808080ffff02ff26ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ff5effff04ff02ffff04ff05ffff04ff0bffff04ffff02ff3affff04ff02ffff04ff09ffff04ff17ffff04ffff02ff26ffff04ff02ffff04ff05ff80808080ff808080808080ffff04ff17ffff04ff2fffff04ff5fffff04ff81bfff80808080808080808080ffff04ffff04ff20ffff04ff17ff808080ffff02ff7cffff04ff02ffff04ff05ffff04ffff02ff82017fffff04ffff04ffff04ff17ff2f80ffff04ffff04ff5fff81bf80ffff04ff0bff05808080ff8202ff8080ffff01ff80808080808080ffff02ff2effff04ff02ffff04ff05ffff04ff0bffff04ffff02ffff03ff3bffff01ff02ff22ffff04ff02ffff04ff05ffff04ff17ffff04ff13ffff04ff2bffff04ff5bffff04ff5fff808080808080808080ffff01ff02ffff03ffff09ff15ffff0bff13ff1dff2b8080ffff01ff0bff15ff17ff5f80ffff01ff088080ff018080ff0180ffff04ff17ffff04ff2fffff04ff5fffff04ff81bfffff04ff82017fff8080808080808080808080ff02ffff03ff05ffff011bffff010b80ff0180ff018080");
-pub const SINGLETON_TOP_LAYER_HASH: [u8; 32] = hex!("24e044101e57b3d8c908b8a38ad57848afd29d3eecc439dba45f4412df4954fd");
+pub const SINGLETON_TOP_LAYER_HASH: [u8; 32] =
+    hex!("24e044101e57b3d8c908b8a38ad57848afd29d3eecc439dba45f4412df4954fd");
