@@ -1,4 +1,4 @@
-mod loaded_chialisp;
+mod programs;
 mod tests;
 
-pub use loaded_chialisp::*;
+pub use programs::*;

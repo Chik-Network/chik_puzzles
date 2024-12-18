@@ -97,6 +97,12 @@ chialisp_dictionary = [
         "./puzzles/did_puzzles/did_innerpuz.clsp.hex",
         "33143d2bef64f14036742673afd158126b94284b4530a28c354fac202b0c910e",
     ),
+    # DL Puzzles
+    (
+        "GRAFTROOT_DL_OFFERS",
+        "./puzzles/dl_puzzles/graftroot_dl_offers.clsp.hex",
+        "0893e36a88c064fddfa6f8abdb42c044584a98cb4273b80cccc83b4867b701a1",
+    ),
     # NFT Puzzles
     (
         "CREATE_NFT_LAUNCHER_FROM_DID",
@@ -284,7 +290,7 @@ chialisp_dictionary = [
     ),
 ]
 
-rust_dest_path = Path("./src/loaded_chialisp.rs")
+rust_dest_path = Path("./src/programs.rs")
 python_dest_path = Path("./chia_puzzles_py/programs.py")
 
 os.makedirs(rust_dest_path.parent, exist_ok=True)
@@ -335,6 +341,8 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 temp_hex_data = (
                     hex_file.read().strip().replace("\n", "").replace("\r", "")
                 )
+            with open(source_code_path, "r") as source_file:
+                source = source_file.read().strip()
 
             if temp_hex_data != hex_data:
                 raise ValueError(
@@ -342,27 +350,60 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 )
 
             # Check if the actual treehash of the Program matches the recorded hash
-            if generate_hash_bytes(bytes_data).hex() != hash:
+            hash_bytes = generate_hash_bytes(bytes_data)
+            if hash_bytes.hex() != hash:
                 raise ValueError(f"Hash mismatch found in: {name}")
 
-            rust_file.write(f"pub const {name}: [u8; {len(bytes_data)}] =")
-            if len(hex_data) < 85 and len(hex_data) > 66:
-                rust_file.write("\n")
-                rust_file.write(f'    hex!("{hex_data}");\n')
-            elif len(hex_data) < 100 and len(hex_data) > 66:
-                rust_file.write(" hex!(\n")
-                rust_file.write(f'    "{hex_data}"\n')
-                rust_file.write(");\n")
+            rust_file.write("\n")
+
+            rust_file.write("/// ```text\n")
+            rust_file.write(
+                "\n".join(
+                    map(
+                        lambda line: f"/// {line}" if len(line) > 0 else "///",
+                        source.splitlines(),
+                    )
+                )
+            )
+            rust_file.write("\n/// ```\n")
+
+            inline_rust_hex = (
+                f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!("{hex_data}");'
+            )
+            if len(inline_rust_hex) > 100 and len(hex_data) <= 94:
+                if len(hex_data) + 13 > 100:
+                    rust_file.write(
+                        f'pub const {name}: [u8; {len(hex_data) // 2}] = hex!(\n    "{hex_data}"\n);\n'
+                    )
+                else:
+                    rust_file.write(
+                        f'pub const {name}: [u8; {len(hex_data) // 2}] =\n    hex!("{hex_data}");\n'
+                    )
             else:
-                rust_file.write(f' hex!("{hex_data}");\n')
+                rust_file.write(inline_rust_hex + "\n")
+
+            inline_rust_hash = (
+                f'pub const {name}_HASH: [u8; {len(hash) // 2}] = hex!("{hash}");'
+            )
+            if len(inline_rust_hash) > 100 and len(hash) <= 94:
+                rust_file.write(
+                    f'pub const {name}_HASH: [u8; {len(hash) // 2}] =\n    hex!("{hash}");\n'
+                )
+            else:
+                rust_file.write(inline_rust_hash + "\n")
 
             # Write the Python file with line length appropriate formatting
-            if len(hex_data) > 66:
-                python_file.write(f"{name} = bytes.fromhex(\n")
-                python_file.write(f'    "{hex_data}"\n')
-                python_file.write(")\n")
+            inline_python_hex = f'{name} = bytes.fromhex("{hex_data}")'
+            if len(inline_python_hex) > 88:
+                python_file.write(f'{name} = bytes.fromhex(\n    "{hex_data}"\n)\n')
             else:
-                python_file.write(f'{name} = bytes.fromhex("{hex_data}")\n')
+                python_file.write(inline_python_hex + "\n")
+
+            inline_python_hash = f'{name}_HASH = bytes.fromhex("{hash}")'
+            if len(inline_python_hash) > 88:
+                python_file.write(f'{name}_HASH = bytes.fromhex(\n    "{hash}"\n)\n')
+            else:
+                python_file.write(inline_python_hash + "\n")
 
             print(f"Processed {name} from {file_path}")
 
