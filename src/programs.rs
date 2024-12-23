@@ -4127,6 +4127,30 @@ pub const P2_SINGLETON_HASH: [u8; 32] =
     hex!("40f828d8dd55603f4ff9fbf6b73271e904e69406982f4fbefae2c8dcceaf9834");
 
 /// ```text
+/// (mod
+///   (inner_puzzle_hash inner_puzzle inner_puzzle_solution)
+///
+///   ;; hash a tree
+///   ;; This is used to calculate a puzzle hash given a puzzle program.
+///   (defun sha256tree1
+///     (TREE)
+///     (if (l TREE)
+///         (sha256 2 (sha256tree1 (f TREE)) (sha256tree1 (r TREE)))
+///         (sha256 1 TREE)
+///     )
+///   )
+///
+///   (if (= inner_puzzle_hash (sha256tree1 inner_puzzle))
+///       (a inner_puzzle inner_puzzle_solution)
+///       (x)
+///   )
+/// )
+/// ```
+pub const P2_PUZZLE_HASH: [u8; 143] = hex!("ff02ffff01ff02ffff03ffff09ff05ffff02ff02ffff04ff02ffff04ff0bff8080808080ffff01ff02ff0bff1780ffff01ff088080ff0180ffff04ffff01ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff02ffff04ff02ffff04ff09ff80808080ffff02ff02ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
+pub const P2_PUZZLE_HASH_HASH: [u8; 32] =
+    hex!("13e29a62b42cd2ef72a79e4bacdc59733ca6310d65af83d349360d36ec622363");
+
+/// ```text
 /// (mod notarized_payments
 ///   ;; `notarized_payments` is a list of notarized coin payments
 ///   ;; a notarized coin payment is `(nonce . ((puzzle_hash amount ...) (puzzle_hash amount ...) ...))`
