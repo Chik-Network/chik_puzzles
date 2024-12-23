@@ -228,7 +228,7 @@ chialisp_dictionary = [
         "0ff94726f1a8dea5c3f70d3121945190778d3b2b3fcda3735a1f290977e98341",
     ),
     (
-        "P2_DELEGATED_PUZZLE_OR_HIDDEN_PUZZZLE",
+        "P2_DELEGATED_PUZZLE_OR_HIDDEN_PUZZLE",
         "./puzzles/p2_delegated_puzzle_or_hidden_puzzle.clsp.hex",
         "e9aaa49f45bad5c889b86ee3341550c155cfdd10c3a6757de618d20612fffd52",
     ),
