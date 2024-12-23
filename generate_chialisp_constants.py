@@ -277,7 +277,7 @@ chialisp_dictionary = [
         "./puzzles/settlement_payments.clsp.hex",
         "cfbfdeed5c4ca2de3d0bf520b9cb4bb7743a359bd2e6a188d19ce7dffc21d3e7",
     ),
-    # Singleton Puzzle
+    # Singleton Puzzles
     (
         "SINGLETON_LAUNCHER",
         "./puzzles/singleton_launcher.clsp.hex",
@@ -292,6 +292,17 @@ chialisp_dictionary = [
         "SINGLETON_TOP_LAYER",
         "./puzzles/singleton_top_layer.clsp.hex",
         "24e044101e57b3d8c908b8a38ad57848afd29d3eecc439dba45f4412df4954fd",
+    ),
+    # Pool Puzzles
+    (
+        "POOL_MEMBER_INNERPUZ",
+        "./puzzles/pool_puzzles/pool_member_innerpuz.clsp.hex",
+        "a8490702e333ddd831a3ac9c22d0fa26d2bfeaf2d33608deb22f0e0123eb0494",
+    ),
+    (
+        "POOL_WAITINGROOM_INNERPUZ",
+        "./puzzles/pool_puzzles/pool_waitingroom_innerpuz.clsp.hex",
+        "a317541a765bf8375e1c6e7c13503d0d2cbf56cacad5182befe947e78e2c0307",
     ),
 ]
 
