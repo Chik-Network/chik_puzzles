@@ -313,7 +313,7 @@ chialisp_dictionary = [
     (
         "ROM_BOOTSRAP_GENERATOR",
         "./puzzles/consensus_puzzles/rom_bootstrap_generator.clsp.hex",
-        "161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9"
+        "161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9",
     ),
 ]
 
