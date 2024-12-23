@@ -4673,3 +4673,121 @@ pub const POOL_MEMBER_INNERPUZ_HASH: [u8; 32] =
 pub const POOL_WAITINGROOM_INNERPUZ: [u8; 412] = hex!("ff02ffff01ff02ffff03ff82017fffff01ff04ffff04ff1cffff04ff5fff808080ffff04ffff04ff12ffff04ff8205ffffff04ff8206bfff80808080ffff04ffff04ff08ffff04ff17ffff04ffff02ff1effff04ff02ffff04ffff04ff8205ffffff04ff8202ffff808080ff80808080ff80808080ff80808080ffff01ff02ff16ffff04ff02ffff04ff05ffff04ff8204bfffff04ff8206bfffff04ff8202ffffff04ffff0bffff19ff2fffff18ffff019100ffffffffffffffffffffffffffffffffff8205ff8080ff0bff8202ff80ff808080808080808080ff0180ffff04ffff01ffff32ff3d52ffff333effff04ffff04ff12ffff04ff0bffff04ff17ff80808080ffff04ffff04ff12ffff04ff05ffff04ff2fff80808080ffff04ffff04ff1affff04ff5fff808080ffff04ffff04ff14ffff04ffff0bff5fffff012480ff808080ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
 pub const POOL_WAITINGROOM_INNERPUZ_HASH: [u8; 32] =
     hex!("a317541a765bf8375e1c6e7c13503d0d2cbf56cacad5182befe947e78e2c0307");
+
+/// ```text
+/// ;; this code is included in the ROM. Unfortunately, it has a problem that limits
+/// ;; its usefulness: it is incapable of deserializing atoms with length longer than
+/// ;; 8191 = 0x1fff.
+/// ;;
+/// ;; Because this code is included in the ROM, fixing the bug would be a hard fork
+/// ;; so we're rather stuck with this bug. We recommend simply using a local version
+/// ;; of this code when necessary.
+///
+/// (mod (input)
+///
+///   (defconstant MAX_SINGLE_BYTE 0x7F)
+///   (defconstant MAX_TWO_BYTE 0xbf)
+///   (defconstant MAX_THREE_BYTE 0xdf)
+///   (defconstant MAX_FOUR_BYTE 0xef)
+///   (defconstant MAX_FIVE_BYTE 0xf7)
+///   (defconstant MAX_SIX_BYTE 0xfb)
+///   (defconstant CONS_BOX_MARKER 0xFF)
+///
+///   (defun sexp_from_stream (input_stream)
+///     (if (= (substr input_stream 0 1) CONS_BOX_MARKER)
+///         (cons_sexp_from_stream (sexp_from_stream (substr input_stream 1)))
+///         (atom_from_stream (substr input_stream 1) (substr input_stream 0 1))
+///     )
+///   )
+///
+///   (defun cons_sexp_from_stream (left_sexp_with_input)
+///     (cons_return (f left_sexp_with_input) (sexp_from_stream (f (r left_sexp_with_input))))
+///   )
+///
+///   (defun cons_return (left_sexp right_sexp_with_input)
+///     (list (c left_sexp (f right_sexp_with_input)) (f (r right_sexp_with_input)))
+///   )
+///
+///   (defun atom_from_stream (input_file input_bits)
+///     (if (= input_bits (quote 0x80))
+///         (list () input_file)
+///         (if (>s input_bits MAX_SINGLE_BYTE)
+///             (atom_from_stream_part_two (get_bitcount input_bits input_file))
+///             (list input_bits input_file)
+///         )
+///     )
+///   )
+///
+///   ; Note that we reject any serialized atom here with more than 3 bytes of
+///   ; encoded length prefix, even though the Rust and Python CLVM interpreters
+///   ; and deserializers support more.
+///   ; This allows 5 + 8 = 13 bits = 8191-byte atoms
+///   ; Also note that this does not limit intermediate atom length. Those limits
+///   ; are implemented in the clvm interpreters theselves
+///   (defun-inline get_bitcount (input_bits input_file)
+///     (if (>s input_bits MAX_TWO_BYTE)
+///         (if (>s input_bits MAX_THREE_BYTE)
+///             (x)
+///             ;three byte length prefix
+///             (list (concat (logand (quote 0x1f) input_bits) (substr input_file 0 1)) (substr input_file 1))
+///         )
+///         ;two byte length prefix
+///         (list (logand (quote 0x3f) input_bits) input_file)
+///     )
+///   )
+///
+///   (defun atom_from_stream_part_two ((size_to_read input_file))
+///     (list (substr input_file 0 size_to_read) (substr input_file size_to_read))
+///   )
+///
+///   ; main
+///   (f (sexp_from_stream input))
+///
+/// )
+/// ```
+pub const CHIALISP_DESERIALISATION: [u8; 471] = hex!("ff02ffff01ff05ffff02ff3effff04ff02ffff04ff05ff8080808080ffff04ffff01ffffff81ff7fff81df81bfffffff02ffff03ffff09ff0bffff01818080ffff01ff04ff80ffff04ff05ff808080ffff01ff02ffff03ffff0aff0bff1880ffff01ff02ff1affff04ff02ffff04ffff02ffff03ffff0aff0bff1c80ffff01ff02ffff03ffff0aff0bff1480ffff01ff0880ffff01ff04ffff0effff18ffff011fff0b80ffff0cff05ff80ffff01018080ffff04ffff0cff05ffff010180ff80808080ff0180ffff01ff04ffff18ffff013fff0b80ffff04ff05ff80808080ff0180ff80808080ffff01ff04ff0bffff04ff05ff80808080ff018080ff0180ff04ffff0cff15ff80ff0980ffff04ffff0cff15ff0980ff808080ffff04ffff04ff05ff1380ffff04ff2bff808080ffff02ff16ffff04ff02ffff04ff09ffff04ffff02ff3effff04ff02ffff04ff15ff80808080ff8080808080ff02ffff03ffff09ffff0cff05ff80ffff010180ff1080ffff01ff02ff2effff04ff02ffff04ffff02ff3effff04ff02ffff04ffff0cff05ffff010180ff80808080ff80808080ffff01ff02ff12ffff04ff02ffff04ffff0cff05ffff010180ffff04ffff0cff05ff80ffff010180ff808080808080ff0180ff018080");
+pub const CHIALISP_DESERIALISATION_HASH: [u8; 32] =
+    hex!("94ec19077f9a34e0b11ad2456af0170f4cc03f11230ca42e3f82e6e644ac4f5d");
+
+/// ```text
+/// (mod (block_decompresser_program (historical_blocks_tree))
+///
+///   (defconstant local_deserialize_mod
+///     ;; this monstrosity is the assembly output of `chialisp_deserialisation.clsp`
+///     ;; it's pasted in here because the compiler doesn't yet support nested `mod`
+///     ;; my apologies -- RK
+///
+///     (a (q 5 (a 62 (c 2 (c 5 ()))))
+///       (c (q ((-1 . 127) -33 . -65) ((a (i (= 11 (q . -128)) (q 4 () (c 5 ())) (q 2 (i (>s 11 24) (q 2 26 (c 2 (c (a (i (>s 11 28) (q 2 (i (>s 11 20) (q 8) (q 4 (concat (logand (q . 31) 11) (substr 5 () (q . 1))) (c (substr 5 (q . 1)) ()))) 1) (q 4 (logand (q . 63) 11) (c 5 ()))) 1) ()))) (q 4 11 (c 5 ()))) 1)) 1) 4 (substr 21 () 9) (c (substr 21 9) ())) (c (c 5 19) (c 43 ())) (a 22 (c 2 (c 9 (c (a 62 (c 2 (c 21 ()))) ())))) 2 (i (= (substr 5 () (q . 1)) 16) (q 2 46 (c 2 (c (a 62 (c 2 (c (substr 5 (q . 1)) ()))) ()))) (q 2 18 (c 2 (c (substr 5 (q . 1)) (c (substr 5 () (q . 1)) ()))))) 1)
+///     1))
+///   )
+///
+///   (defun sha256tree
+///     (TREE)
+///     (if (l TREE)
+///         (sha256 2 (sha256tree (f TREE)) (sha256tree (r TREE)))
+///         (sha256 1 TREE)
+///     )
+///   )
+///
+///   (defun process_coin_spend ((parent puzzle amount solution . spend_level_extras))
+///     (c parent (c (sha256tree puzzle) (c amount (c (a puzzle solution) spend_level_extras))))
+///   )
+///
+///   (defun recurse (coin_spends)
+///     (if coin_spends
+///         (c (process_coin_spend (f coin_spends)) (recurse (r coin_spends)))
+///         0
+///     )
+///   )
+///
+///   (defun process-decompressor ((coin_spends . block-level-extras))
+///     (c (recurse coin_spends) block-level-extras)
+///   )
+///
+/// (process-decompressor (a block_decompresser_program (list local_deserialize_mod historical_blocks_tree))))
+/// )
+/// ```
+pub const ROM_BOOTSRAP_GENERATOR: [u8; 737] = hex!("ff02ffff01ff02ff0cffff04ff02ffff04ffff02ff05ffff04ff08ffff04ff13ff80808080ff80808080ffff04ffff01ffffff02ffff01ff05ffff02ff3effff04ff02ffff04ff05ff8080808080ffff04ffff01ffffff81ff7fff81df81bfffffff02ffff03ffff09ff0bffff01818080ffff01ff04ff80ffff04ff05ff808080ffff01ff02ffff03ffff0aff0bff1880ffff01ff02ff1affff04ff02ffff04ffff02ffff03ffff0aff0bff1c80ffff01ff02ffff03ffff0aff0bff1480ffff01ff0880ffff01ff04ffff0effff18ffff011fff0b80ffff0cff05ff80ffff01018080ffff04ffff0cff05ffff010180ff80808080ff0180ffff01ff04ffff18ffff013fff0b80ffff04ff05ff80808080ff0180ff80808080ffff01ff04ff0bffff04ff05ff80808080ff018080ff0180ff04ffff0cff15ff80ff0980ffff04ffff0cff15ff0980ff808080ffff04ffff04ff05ff1380ffff04ff2bff808080ffff02ff16ffff04ff02ffff04ff09ffff04ffff02ff3effff04ff02ffff04ff15ff80808080ff8080808080ff02ffff03ffff09ffff0cff05ff80ffff010180ff1080ffff01ff02ff2effff04ff02ffff04ffff02ff3effff04ff02ffff04ffff0cff05ffff010180ff80808080ff80808080ffff01ff02ff12ffff04ff02ffff04ffff0cff05ffff010180ffff04ffff0cff05ff80ffff010180ff808080808080ff0180ff018080ff04ffff02ff16ffff04ff02ffff04ff09ff80808080ff0d80ffff04ff09ffff04ffff02ff1effff04ff02ffff04ff15ff80808080ffff04ff2dffff04ffff02ff15ff5d80ff7d80808080ffff02ffff03ff05ffff01ff04ffff02ff0affff04ff02ffff04ff09ff80808080ffff02ff16ffff04ff02ffff04ff0dff8080808080ff8080ff0180ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
+pub const ROM_BOOTSRAP_GENERATOR_HASH: [u8; 32] =
+    hex!("161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9");
