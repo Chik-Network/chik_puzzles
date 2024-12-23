@@ -268,6 +268,11 @@ chialisp_dictionary = [
         "40f828d8dd55603f4ff9fbf6b73271e904e69406982f4fbefae2c8dcceaf9834",
     ),
     (
+        "P2_PUZZLE_HASH",
+        "./puzzles/p2_puzzle_hash.clsp.hex",
+        "13e29a62b42cd2ef72a79e4bacdc59733ca6310d65af83d349360d36ec622363",
+    ),
+    (
         "SETTLEMENT_PAYMENT",
         "./puzzles/settlement_payments.clsp.hex",
         "cfbfdeed5c4ca2de3d0bf520b9cb4bb7743a359bd2e6a188d19ce7dffc21d3e7",
