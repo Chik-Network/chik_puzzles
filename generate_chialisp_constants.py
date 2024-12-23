@@ -304,6 +304,17 @@ chialisp_dictionary = [
         "./puzzles/pool_puzzles/pool_waitingroom_innerpuz.clsp.hex",
         "a317541a765bf8375e1c6e7c13503d0d2cbf56cacad5182befe947e78e2c0307",
     ),
+    # Consensus Puzzles
+    (
+        "CHIALISP_DESERIALISATION",
+        "./puzzles/consensus_puzzles/chialisp_deserialisation.clsp.hex",
+        "94ec19077f9a34e0b11ad2456af0170f4cc03f11230ca42e3f82e6e644ac4f5d",
+    ),
+    (
+        "ROM_BOOTSRAP_GENERATOR",
+        "./puzzles/consensus_puzzles/rom_bootstrap_generator.clsp.hex",
+        "161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9",
+    ),
 ]
 
 rust_dest_path = Path("./src/programs.rs")
