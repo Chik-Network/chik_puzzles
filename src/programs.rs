@@ -4522,3 +4522,154 @@ pub const SINGLETON_TOP_LAYER_V1_1_HASH: [u8; 32] =
 pub const SINGLETON_TOP_LAYER: [u8; 1168] = hex!("ff02ffff01ff02ffff03ffff18ff2fffff010180ffff01ff02ff36ffff04ff02ffff04ff05ffff04ff17ffff04ffff02ff26ffff04ff02ffff04ff0bff80808080ffff04ff2fffff04ff0bffff04ff5fff808080808080808080ffff01ff088080ff0180ffff04ffff01ffffffff4602ff3304ffff0101ff02ffff02ffff03ff05ffff01ff02ff5cffff04ff02ffff04ff0dffff04ffff0bff2cffff0bff24ff3880ffff0bff2cffff0bff2cffff0bff24ff3480ff0980ffff0bff2cff0bffff0bff24ff8080808080ff8080808080ffff010b80ff0180ff02ffff03ff0bffff01ff02ff32ffff04ff02ffff04ff05ffff04ff0bffff04ff17ffff04ffff02ff2affff04ff02ffff04ffff02ffff03ffff09ff23ff2880ffff0181b3ff8080ff0180ff80808080ff80808080808080ffff01ff02ffff03ff17ff80ffff01ff088080ff018080ff0180ffffffff0bffff0bff17ffff02ff3affff04ff02ffff04ff09ffff04ff2fffff04ffff02ff26ffff04ff02ffff04ff05ff80808080ff808080808080ff5f80ff0bff81bf80ff02ffff03ffff20ffff22ff4fff178080ffff01ff02ff7effff04ff02ffff04ff6fffff04ffff04ffff02ffff03ff4fffff01ff04ff23ffff04ffff02ff3affff04ff02ffff04ff09ffff04ff53ffff04ffff02ff26ffff04ff02ffff04ff05ff80808080ff808080808080ffff04ff81b3ff80808080ffff011380ff0180ffff02ff7cffff04ff02ffff04ff05ffff04ff1bffff04ffff21ff4fff1780ff80808080808080ff8080808080ffff01ff088080ff0180ffff04ffff09ffff18ff05ffff010180ffff010180ffff09ff05ffff01818f8080ff0bff2cffff0bff24ff3080ffff0bff2cffff0bff2cffff0bff24ff3480ff0580ffff0bff2cffff02ff5cffff04ff02ffff04ff07ffff04ffff0bff24ff2480ff8080808080ffff0bff24ff8080808080ffffff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff26ffff04ff02ffff04ff09ff80808080ffff02ff26ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff02ff5effff04ff02ffff04ff05ffff04ff0bffff04ffff02ff3affff04ff02ffff04ff09ffff04ff17ffff04ffff02ff26ffff04ff02ffff04ff05ff80808080ff808080808080ffff04ff17ffff04ff2fffff04ff5fffff04ff81bfff80808080808080808080ffff04ffff04ff20ffff04ff17ff808080ffff02ff7cffff04ff02ffff04ff05ffff04ffff02ff82017fffff04ffff04ffff04ff17ff2f80ffff04ffff04ff5fff81bf80ffff04ff0bff05808080ff8202ff8080ffff01ff80808080808080ffff02ff2effff04ff02ffff04ff05ffff04ff0bffff04ffff02ffff03ff3bffff01ff02ff22ffff04ff02ffff04ff05ffff04ff17ffff04ff13ffff04ff2bffff04ff5bffff04ff5fff808080808080808080ffff01ff02ffff03ffff09ff15ffff0bff13ff1dff2b8080ffff01ff0bff15ff17ff5f80ffff01ff088080ff018080ff0180ffff04ff17ffff04ff2fffff04ff5fffff04ff81bfffff04ff82017fff8080808080808080808080ff02ffff03ff05ffff011bffff010b80ff0180ff018080");
 pub const SINGLETON_TOP_LAYER_HASH: [u8; 32] =
     hex!("24e044101e57b3d8c908b8a38ad57848afd29d3eecc439dba45f4412df4954fd");
+
+/// ```text
+/// (mod (POOL_PUZZLE_HASH
+///     P2_SINGLETON_PUZZLE_HASH
+///     OWNER_PUBKEY
+///     POOL_REWARD_PREFIX
+///     WAITINGROOM_PUZHASH
+///     Truths
+///     p1
+///     pool_reward_height
+///   )
+///
+///
+///   ; POOL_PUZZLE_HASH is commitment to the pool's puzzle hash
+///   ; P2_SINGLETON_PUZZLE_HASH is the puzzle hash for your pay to singleton puzzle
+///   ; OWNER_PUBKEY is the farmer pubkey which authorises a travel
+///   ; POOL_REWARD_PREFIX is network-specific data (mainnet vs testnet) that helps determine if a coin is a pool reward
+///   ; WAITINGROOM_PUZHASH is the puzzle_hash you'll go to when you initiate the leaving process
+///
+///   ; Absorbing money if pool_reward_height is an atom
+///   ; Escaping if pool_reward_height is ()
+///
+///   ; p1 is pool_reward_amount if absorbing money
+///   ; p1 is extra_data key_value_list if escaping
+///
+///   ; pool_reward_amount is the value of the coin reward - this is passed in so that this puzzle will still work after halvenings
+///   ; pool_reward_height is the block height that the reward was generated at. This is used to calculate the coin ID.
+///   ; key_value_list is signed extra data that the wallet may want to publicly announce for syncing purposes
+///
+///   (include condition_codes.clib)
+///   (include singleton_truths.clib)
+///
+///   ; takes a lisp tree and returns the hash of it
+///   (defun sha256tree (TREE)
+///     (if (l TREE)
+///         (sha256 2 (sha256tree (f TREE)) (sha256tree (r TREE)))
+///         (sha256 1 TREE)
+///     )
+///   )
+///
+///   (defun-inline calculate_pool_reward (pool_reward_height P2_SINGLETON_PUZZLE_HASH POOL_REWARD_PREFIX pool_reward_amount)
+///     (sha256 (logior POOL_REWARD_PREFIX (logand (- (lsh (q . 1) (q . 128)) (q . 1)) pool_reward_height)) P2_SINGLETON_PUZZLE_HASH pool_reward_amount)
+///   )
+///
+///   (defun absorb_pool_reward (POOL_PUZZLE_HASH my_inner_puzzle_hash my_amount pool_reward_amount pool_reward_id)
+///     (list
+///       (list CREATE_COIN my_inner_puzzle_hash my_amount)
+///       (list CREATE_COIN POOL_PUZZLE_HASH pool_reward_amount)
+///       (list CREATE_PUZZLE_ANNOUNCEMENT pool_reward_id)
+///       (list ASSERT_COIN_ANNOUNCEMENT (sha256 pool_reward_id '$'))
+///     )
+///   )
+///
+///   (defun-inline travel_to_waitingroom (OWNER_PUBKEY WAITINGROOM_PUZHASH my_amount extra_data)
+///     (list (list AGG_SIG_ME OWNER_PUBKEY (sha256tree extra_data))
+///       (list CREATE_COIN WAITINGROOM_PUZHASH my_amount)
+///     )
+///   )
+///
+///   ; main
+///
+///   (if pool_reward_height
+///       (absorb_pool_reward POOL_PUZZLE_HASH
+///         (my_inner_puzzle_hash_truth Truths)
+///         (my_amount_truth Truths)
+///         p1
+///         (calculate_pool_reward pool_reward_height P2_SINGLETON_PUZZLE_HASH POOL_REWARD_PREFIX p1)
+///       )
+///       (travel_to_waitingroom OWNER_PUBKEY WAITINGROOM_PUZHASH (my_amount_truth Truths) p1)
+///   )
+/// )
+/// )
+/// ```
+pub const POOL_MEMBER_INNERPUZ: [u8; 376] = hex!("ff02ffff01ff02ffff03ff8202ffffff01ff02ff16ffff04ff02ffff04ff05ffff04ff8204bfffff04ff8206bfffff04ff82017fffff04ffff0bffff19ff2fffff18ffff019100ffffffffffffffffffffffffffffffffff8202ff8080ff0bff82017f80ff8080808080808080ffff01ff04ffff04ff08ffff04ff17ffff04ffff02ff1effff04ff02ffff04ff82017fff80808080ff80808080ffff04ffff04ff1cffff04ff5fffff04ff8206bfff80808080ff80808080ff0180ffff04ffff01ffff32ff3d33ff3effff04ffff04ff1cffff04ff0bffff04ff17ff80808080ffff04ffff04ff1cffff04ff05ffff04ff2fff80808080ffff04ffff04ff0affff04ff5fff808080ffff04ffff04ff14ffff04ffff0bff5fffff012480ff808080ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
+pub const POOL_MEMBER_INNERPUZ_HASH: [u8; 32] =
+    hex!("a8490702e333ddd831a3ac9c22d0fa26d2bfeaf2d33608deb22f0e0123eb0494");
+
+/// ```text
+/// (mod (POOL_PUZZLE_HASH
+///     P2_SINGLETON_PUZZLE_HASH
+///     OWNER_PUBKEY
+///     POOL_REWARD_PREFIX
+///     RELATIVE_LOCK_HEIGHT
+///     Truths
+///     spend_type
+///     p1
+///     p2
+///   )
+///
+///   ; POOL_PUZZLE_HASH is commitment to the pool's puzzle hash
+///   ; P2_SINGLETON_PUZZLE_HASH is the puzzlehash for your pay_to_singleton puzzle
+///   ; OWNER_PUBKEY is the farmer pubkey which signs the exit puzzle_hash
+///   ; POOL_REWARD_PREFIX is network-specific data (mainnet vs testnet) that helps determine if a coin is a pool reward
+///   ; RELATIVE_LOCK_HEIGHT is how long it takes to leave
+///
+///   ; spend_type is: 0 for absorbing money, 1 to escape
+///   ; if spend_type is 0
+///   ; p1 is pool_reward_amount - the value of the coin reward - this is passed in so that this puzzle will still work after halvenings
+///   ; p2 is pool_reward_height - the block height that the reward was generated at. This is used to calculate the coin ID.
+///   ; if spend_type is 1
+///   ; p1 is extra_data key_value_list - signed extra data that the wallet may want to publicly announce for syncing purposes
+///   ; p2 is destination_puzhash - the location that the escape spend wants to create itself to
+///
+///   (include condition_codes.clib)
+///   (include singleton_truths.clib)
+///
+///   ; takes a lisp tree and returns the hash of it
+///   (defun sha256tree (TREE)
+///     (if (l TREE)
+///         (sha256 2 (sha256tree (f TREE)) (sha256tree (r TREE)))
+///         (sha256 1 TREE)
+///     )
+///   )
+///
+///   (defun-inline calculate_pool_reward (pool_reward_height P2_SINGLETON_PUZZLE_HASH POOL_REWARD_PREFIX pool_reward_amount)
+///     (sha256 (logior POOL_REWARD_PREFIX (logand (- (lsh (q . 1) (q . 128)) (q . 1)) pool_reward_height)) P2_SINGLETON_PUZZLE_HASH pool_reward_amount)
+///   )
+///
+///   (defun absorb_pool_reward (POOL_PUZZLE_HASH my_inner_puzzle_hash my_amount pool_reward_amount pool_reward_id)
+///     (list
+///       (list CREATE_COIN my_inner_puzzle_hash my_amount)
+///       (list CREATE_COIN POOL_PUZZLE_HASH pool_reward_amount)
+///       (list CREATE_PUZZLE_ANNOUNCEMENT pool_reward_id)
+///       (list ASSERT_COIN_ANNOUNCEMENT (sha256 pool_reward_id '$'))
+///     )
+///   )
+///
+///   (defun-inline travel_spend (RELATIVE_LOCK_HEIGHT new_puzzle_hash my_amount extra_data)
+///     (list (list ASSERT_HEIGHT_RELATIVE RELATIVE_LOCK_HEIGHT)
+///       (list CREATE_COIN new_puzzle_hash my_amount)
+///       (list AGG_SIG_ME OWNER_PUBKEY (sha256tree (list new_puzzle_hash extra_data)))
+///     )
+///   )
+///
+///   ; main
+///
+///   (if spend_type
+///       (travel_spend RELATIVE_LOCK_HEIGHT p2 (my_amount_truth Truths) p1)
+///       (absorb_pool_reward POOL_PUZZLE_HASH
+///         (my_inner_puzzle_hash_truth Truths)
+///         (my_amount_truth Truths)
+///         p1
+///         (calculate_pool_reward p2 P2_SINGLETON_PUZZLE_HASH POOL_REWARD_PREFIX p1)
+///       )
+///   )
+///
+/// )
+/// ```
+pub const POOL_WAITINGROOM_INNERPUZ: [u8; 412] = hex!("ff02ffff01ff02ffff03ff82017fffff01ff04ffff04ff1cffff04ff5fff808080ffff04ffff04ff12ffff04ff8205ffffff04ff8206bfff80808080ffff04ffff04ff08ffff04ff17ffff04ffff02ff1effff04ff02ffff04ffff04ff8205ffffff04ff8202ffff808080ff80808080ff80808080ff80808080ffff01ff02ff16ffff04ff02ffff04ff05ffff04ff8204bfffff04ff8206bfffff04ff8202ffffff04ffff0bffff19ff2fffff18ffff019100ffffffffffffffffffffffffffffffffff8205ff8080ff0bff8202ff80ff808080808080808080ff0180ffff04ffff01ffff32ff3d52ffff333effff04ffff04ff12ffff04ff0bffff04ff17ff80808080ffff04ffff04ff12ffff04ff05ffff04ff2fff80808080ffff04ffff04ff1affff04ff5fff808080ffff04ffff04ff14ffff04ffff0bff5fffff012480ff808080ff8080808080ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
+pub const POOL_WAITINGROOM_INNERPUZ_HASH: [u8; 32] =
+    hex!("a317541a765bf8375e1c6e7c13503d0d2cbf56cacad5182befe947e78e2c0307");
