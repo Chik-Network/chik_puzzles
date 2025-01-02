@@ -4791,3 +4791,57 @@ pub const CHIALISP_DESERIALISATION_HASH: [u8; 32] =
 pub const ROM_BOOTSRAP_GENERATOR: [u8; 737] = hex!("ff02ffff01ff02ff0cffff04ff02ffff04ffff02ff05ffff04ff08ffff04ff13ff80808080ff80808080ffff04ffff01ffffff02ffff01ff05ffff02ff3effff04ff02ffff04ff05ff8080808080ffff04ffff01ffffff81ff7fff81df81bfffffff02ffff03ffff09ff0bffff01818080ffff01ff04ff80ffff04ff05ff808080ffff01ff02ffff03ffff0aff0bff1880ffff01ff02ff1affff04ff02ffff04ffff02ffff03ffff0aff0bff1c80ffff01ff02ffff03ffff0aff0bff1480ffff01ff0880ffff01ff04ffff0effff18ffff011fff0b80ffff0cff05ff80ffff01018080ffff04ffff0cff05ffff010180ff80808080ff0180ffff01ff04ffff18ffff013fff0b80ffff04ff05ff80808080ff0180ff80808080ffff01ff04ff0bffff04ff05ff80808080ff018080ff0180ff04ffff0cff15ff80ff0980ffff04ffff0cff15ff0980ff808080ffff04ffff04ff05ff1380ffff04ff2bff808080ffff02ff16ffff04ff02ffff04ff09ffff04ffff02ff3effff04ff02ffff04ff15ff80808080ff8080808080ff02ffff03ffff09ffff0cff05ff80ffff010180ff1080ffff01ff02ff2effff04ff02ffff04ffff02ff3effff04ff02ffff04ffff0cff05ffff010180ff80808080ff80808080ffff01ff02ff12ffff04ff02ffff04ffff0cff05ffff010180ffff04ffff0cff05ff80ffff010180ff808080808080ff0180ff018080ff04ffff02ff16ffff04ff02ffff04ff09ff80808080ff0d80ffff04ff09ffff04ffff02ff1effff04ff02ffff04ff15ff80808080ffff04ff2dffff04ffff02ff15ff5d80ff7d80808080ffff02ffff03ff05ffff01ff04ffff02ff0affff04ff02ffff04ff09ff80808080ffff02ff16ffff04ff02ffff04ff0dff8080808080ff8080ff0180ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff1effff04ff02ffff04ff09ff80808080ffff02ff1effff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080");
 pub const ROM_BOOTSRAP_GENERATOR_HASH: [u8; 32] =
     hex!("161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9");
+
+/// ```text
+/// ; TODO convert generators arg to list of generators
+///
+/// (mod (decompress_puzzle decompress_coin_spend_entry start end compressed_cses deserialize gen_list reserved_arg)
+///
+///   (defun decompress_cses (decompress_puzzle decompress_coin_spend_entry cses deserialize puzzle_prefix)
+///     (if cses
+///         (c (a decompress_coin_spend_entry (list deserialize decompress_puzzle puzzle_prefix (f cses)))
+///         (decompress_cses decompress_puzzle decompress_coin_spend_entry (r cses) deserialize puzzle_prefix ))
+///   ()) )
+///
+///   (list (decompress_cses decompress_puzzle decompress_coin_spend_entry compressed_cses deserialize (substr (f gen_list) start end)))
+///
+/// )
+/// ```
+pub const BLOCK_PROGRAM_ZERO: [u8; 170] = hex!("ff02ffff01ff04ffff02ff02ffff04ff02ffff04ff05ffff04ff0bffff04ff5fffff04ff81bfffff04ffff0cff82027fff17ff2f80ff8080808080808080ff8080ffff04ffff01ff02ffff03ff17ffff01ff04ffff02ff0bffff04ff2fffff04ff05ffff04ff5fffff04ff27ff808080808080ffff02ff02ffff04ff02ffff04ff05ffff04ff0bffff04ff37ffff04ff2fffff04ff5fff808080808080808080ff8080ff0180ff018080");
+pub const BLOCK_PROGRAM_ZERO_HASH: [u8; 32] =
+    hex!("f0a38c8efe58895ae527c65c37f700a4238504691b83990e5dd91bd8b3c30eae");
+
+/// ```text
+/// (mod (deserialize decompress_puzzle puzzle_prefix cse)
+///
+///   ; decompress a single compressed standard transaction
+///
+///   (c (f (f cse)) (c (a decompress_puzzle (list deserialize puzzle_prefix (f (f (r cse))) (q . 0xff018080))) (c (f (r (f cse))) (r (f (r cse))))))
+///
+/// )
+/// ```
+pub const DECOMPRESS_COIN_SPEND_ENTRY_WITH_PREFIX: [u8; 54] = hex!("ff04ff47ffff04ffff02ff05ffff04ff02ffff04ff0bffff04ff8197ffff01ff84ff0180808080808080ffff04ff81a7ff81d7808080");
+pub const DECOMPRESS_COIN_SPEND_ENTRY_WITH_PREFIX_HASH: [u8; 32] =
+    hex!("92aa4bc8060a8836355a1884075141b4791ce1b67ae6092bb166b2845954bc89");
+
+/// ```text
+/// (mod (deserialize decompress_puzzle puzzle_prefix suffix cse)
+///
+///   ; decompress a single compressed standard transaction
+///   (c (f cse) (c (a decompress_puzzle (list deserialize puzzle_prefix (f (f (r cse))) suffix)) (c (f (r (f cse))) (r (f (r cse))))))
+/// )
+/// ```
+pub const DECOMPRESS_COIN_SPEND_ENTRY: [u8; 55] = hex!("ff04ff4fffff04ffff02ff05ffff04ff02ffff04ff0bffff04ff82012fffff04ff17ff808080808080ffff04ff82014fff8201af808080");
+pub const DECOMPRESS_COIN_SPEND_ENTRY_HASH: [u8; 32] =
+    hex!("9d98ed08770d31be4bd1bde4705dab388db5e7e9c349f5a76fc3c347aa3a0b79");
+
+/// ```text
+/// (mod (deserialize puzzle_prefix pubkey suffix)
+///
+///   (a deserialize (list (concat puzzle_prefix pubkey suffix)))
+///
+/// )
+/// ```
+pub const DECOMPRESS_PUZZLE: [u8; 21] = hex!("ff02ff02ffff04ffff0eff05ff0bff1780ff808080");
+pub const DECOMPRESS_PUZZLE_HASH: [u8; 32] =
+    hex!("fe94c58f1117afe315e0450daca1c62460ec1a1c439cd4018d79967a5d7d1370");

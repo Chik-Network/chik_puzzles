@@ -349,3 +349,25 @@ ROM_BOOTSRAP_GENERATOR = bytes.fromhex(
 ROM_BOOTSRAP_GENERATOR_HASH = bytes.fromhex(
     "161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9"
 )
+BLOCK_PROGRAM_ZERO = bytes.fromhex(
+    "ff02ffff01ff04ffff02ff02ffff04ff02ffff04ff05ffff04ff0bffff04ff5fffff04ff81bfffff04ffff0cff82027fff17ff2f80ff8080808080808080ff8080ffff04ffff01ff02ffff03ff17ffff01ff04ffff02ff0bffff04ff2fffff04ff05ffff04ff5fffff04ff27ff808080808080ffff02ff02ffff04ff02ffff04ff05ffff04ff0bffff04ff37ffff04ff2fffff04ff5fff808080808080808080ff8080ff0180ff018080"
+)
+BLOCK_PROGRAM_ZERO_HASH = bytes.fromhex(
+    "f0a38c8efe58895ae527c65c37f700a4238504691b83990e5dd91bd8b3c30eae"
+)
+DECOMPRESS_COIN_SPEND_ENTRY_WITH_PREFIX = bytes.fromhex(
+    "ff04ff47ffff04ffff02ff05ffff04ff02ffff04ff0bffff04ff8197ffff01ff84ff0180808080808080ffff04ff81a7ff81d7808080"
+)
+DECOMPRESS_COIN_SPEND_ENTRY_WITH_PREFIX_HASH = bytes.fromhex(
+    "92aa4bc8060a8836355a1884075141b4791ce1b67ae6092bb166b2845954bc89"
+)
+DECOMPRESS_COIN_SPEND_ENTRY = bytes.fromhex(
+    "ff04ff4fffff04ffff02ff05ffff04ff02ffff04ff0bffff04ff82012fffff04ff17ff808080808080ffff04ff82014fff8201af808080"
+)
+DECOMPRESS_COIN_SPEND_ENTRY_HASH = bytes.fromhex(
+    "9d98ed08770d31be4bd1bde4705dab388db5e7e9c349f5a76fc3c347aa3a0b79"
+)
+DECOMPRESS_PUZZLE = bytes.fromhex("ff02ff02ffff04ffff0eff05ff0bff1780ff808080")
+DECOMPRESS_PUZZLE_HASH = bytes.fromhex(
+    "fe94c58f1117afe315e0450daca1c62460ec1a1c439cd4018d79967a5d7d1370"
+)
