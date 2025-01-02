@@ -1,7 +1,6 @@
 # This is the file that should be run to generate the Rust and Python files with the loaded Chialisp constants.
 
 import os
-from pathlib import Path
 from clvm_tools_rs import compile_clvm
 from chia_puzzles_py.manage_clvm import generate_hash_bytes
 
@@ -316,12 +315,11 @@ chialisp_dictionary = [
         "161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9",
     ),
 ]
+rust_dest_path = "./src/programs.rs"
+python_dest_path = "./chia_puzzles_py/programs.py"
 
-rust_dest_path = Path("./src/programs.rs")
-python_dest_path = Path("./chia_puzzles_py/programs.py")
-
-os.makedirs(rust_dest_path.parent, exist_ok=True)
-os.makedirs(python_dest_path.parent, exist_ok=True)
+os.makedirs(os.path.dirname(rust_dest_path), exist_ok=True)
+os.makedirs(os.path.dirname(python_dest_path), exist_ok=True)
 
 with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
     python_file.write("# Auto-generated Python file with loaded Chialisp constants\n")
@@ -336,10 +334,10 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
 
     rust_file.write("use hex_literal::hex;\n")
 
-    here = Path(__file__).parent.resolve()
+    here = os.path.abspath(os.path.dirname(__file__))
     # Create the temp directory referenced below if it doesn't exist
     os.makedirs("puzzles/temp", exist_ok=True)
-    temp_file = here.joinpath("puzzles/temp/tempfile.clsp.hex")
+    temp_file = os.path.join(here, "puzzles/temp/tempfile.clsp.hex")
     try:
         for name, file_path, hash in chialisp_dictionary:
             with open(file_path, "r") as hex_file:
@@ -354,14 +352,14 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
                 pass
 
             # Check if the source code matches the committed compiled hex
-            source_code_path = here.joinpath(file_path[2:-4])
-            source_code_dir = here.joinpath(file_path).parent
+            source_code_path = os.path.join(here, file_path[2:-4])
+            source_code_dir = os.path.dirname(os.path.join(here, file_path))
             compile_clvm(
-                input_path=os.fspath(source_code_path),
-                output_path=os.fspath(temp_file),
+                input_path=source_code_path,
+                output_path=temp_file,
                 search_paths=[
-                    os.fspath(here.joinpath("puzzles")),
-                    os.fspath(source_code_dir),
+                    os.path.join(here, "puzzles"),
+                    source_code_dir,
                 ],
             )
             with open(temp_file, "r") as hex_file:
