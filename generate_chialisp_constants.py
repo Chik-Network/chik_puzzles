@@ -315,6 +315,27 @@ chialisp_dictionary = [
         "./puzzles/consensus_puzzles/rom_bootstrap_generator.clsp.hex",
         "161bade1f822dcd62ab712ebaf30f3922a301e48a639e4295c5685f8bece7bd9",
     ),
+    # Full Node Puzzles
+    (
+        "BLOCK_PROGRAM_ZERO",
+        "./puzzles/full_node_puzzles/block_program_zero.clsp.hex",
+        "f0a38c8efe58895ae527c65c37f700a4238504691b83990e5dd91bd8b3c30eae",
+    ),
+    (
+        "DECOMPRESS_COIN_SPEND_ENTRY_WITH_PREFIX",
+        "./puzzles/full_node_puzzles/decompress_coin_spend_entry_with_prefix.clsp.hex",
+        "92aa4bc8060a8836355a1884075141b4791ce1b67ae6092bb166b2845954bc89",
+    ),
+    (
+        "DECOMPRESS_COIN_SPEND_ENTRY",
+        "./puzzles/full_node_puzzles/decompress_coin_spend_entry.clsp.hex",
+        "9d98ed08770d31be4bd1bde4705dab388db5e7e9c349f5a76fc3c347aa3a0b79",
+    ),
+    (
+        "DECOMPRESS_PUZZLE",
+        "./puzzles/full_node_puzzles/decompress_puzzle.clsp.hex",
+        "fe94c58f1117afe315e0450daca1c62460ec1a1c439cd4018d79967a5d7d1370",
+    ),
 ]
 
 rust_dest_path = Path("./src/programs.rs")
