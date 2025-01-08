@@ -221,6 +221,12 @@ REVOCATION_LAYER = bytes.fromhex(
 REVOCATION_LAYER_HASH = bytes.fromhex(
     "00848115554ea674131f89f311707a959ad3f4647482648f3fe91ba289131f51"
 )
+ACS_TRANSFER_PROGRAM = bytes.fromhex(
+    "ff02ffff03ff07ffff0107ffff01ff04ff02ffff01ff80ff80808080ff0180"
+)
+ACS_TRANSFER_PROGRAM_HASH = bytes.fromhex(
+    "664e6e57ac6a184334a3e743c446c5d28c0dd2ae6f84bad6dacec29ab7a0bd43"
+)
 AUGMENTED_CONDITION = bytes.fromhex("ff04ff02ffff02ff05ff0b8080")
 AUGMENTED_CONDITION_HASH = bytes.fromhex(
     "d303eafa617bedf0bc05850dd014e10fbddf622187dc07891a2aacba9d8a93f6"
