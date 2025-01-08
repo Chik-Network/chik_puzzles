@@ -3541,6 +3541,14 @@ pub const REVOCATION_LAYER_HASH: [u8; 32] =
     hex!("00848115554ea674131f89f311707a959ad3f4647482648f3fe91ba289131f51");
 
 /// ```text
+/// (mod (METADATA conditions . solution) (if solution solution (list METADATA () ())))
+/// ```
+pub const ACS_TRANSFER_PROGRAM: [u8; 31] =
+    hex!("ff02ffff03ff07ffff0107ffff01ff04ff02ffff01ff80ff80808080ff0180");
+pub const ACS_TRANSFER_PROGRAM_HASH: [u8; 32] =
+    hex!("664e6e57ac6a184334a3e743c446c5d28c0dd2ae6f84bad6dacec29ab7a0bd43");
+
+/// ```text
 /// (mod
 ///   (
 ///     CONDITION

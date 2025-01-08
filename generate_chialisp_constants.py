@@ -200,6 +200,11 @@ chialisp_dictionary = [
         "./puzzles/vc_puzzles/revocation_layer.clsp.hex",
         "00848115554ea674131f89f311707a959ad3f4647482648f3fe91ba289131f51",
     ),
+    (
+        "ACS_TRANSFER_PROGRAM",
+        "./puzzles/vc_puzzles/acs_transfer_program.clsp.hex",
+        "664e6e57ac6a184334a3e743c446c5d28c0dd2ae6f84bad6dacec29ab7a0bd43",
+    ),
     # Misc Puzzles
     (
         "AUGMENTED_CONDITION",
