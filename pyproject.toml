@@ -8,7 +8,7 @@ packages=[{include = "chik_puzzles_py"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-klvm-tools-rs = "^0.1.45"
+klvm-tools-rs = "^0.1.44"
 pytest = "^8.3.3"
 klvm-rs = "^0.2.3"
 
