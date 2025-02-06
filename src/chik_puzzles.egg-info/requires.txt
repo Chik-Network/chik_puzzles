@@ -1,0 +1,2 @@
+klvm-tools>=0.4.10
+pytest>=8.3.3

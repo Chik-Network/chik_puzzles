@@ -1,4 +1,4 @@
-from chia_puzzles_py.programs import CAT_PUZZLE, SINGLETON_TOP_LAYER
+from chik_puzzles_py.programs import CAT_PUZZLE, SINGLETON_TOP_LAYER
 
 
 def test_import_CAT_PUZZLE():

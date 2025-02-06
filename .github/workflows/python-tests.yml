@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: Chia-Network/actions/setup-python@main
+        uses: Chik-Network/actions/setup-python@main
 
       - name: Install Poetry
         run: |
@@ -43,4 +43,4 @@ jobs:
 
       - name: Run Tests with Pytest
         run: |
-          poetry run pytest ./chia_puzzles_py/tests/test_import.py
+          poetry run pytest ./chik_puzzles_py/tests/test_import.py

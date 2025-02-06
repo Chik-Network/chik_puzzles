@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: Chia-Network/actions/setup-python@main
+        uses: Chik-Network/actions/setup-python@main
 
       - name: Install Dependencies
         run: |
@@ -52,7 +52,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: Chia-Network/actions/setup-python@main
+        uses: Chik-Network/actions/setup-python@main
 
       - name: Install Dependencies
         run: |
@@ -65,7 +65,7 @@ jobs:
 
       - name: Check generated
         run: |
-          poetry run python ./generate_chialisp_constants.py
+          poetry run python ./generate_chiklisp_constants.py
           git diff --exit-code
 
   fmt:
@@ -109,9 +109,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set Env
-        uses: Chia-Network/actions/setjobenv@main
+        uses: Chik-Network/actions/setjobenv@main
 
-      - uses: Chia-Network/actions/setup-python@main
+      - uses: Chik-Network/actions/setup-python@main
         with:
           python-version: ${{ matrix.python.major-dot-minor }}
 

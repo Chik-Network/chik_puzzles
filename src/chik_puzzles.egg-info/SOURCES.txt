@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+src/chik_puzzles.egg-info/PKG-INFO
+src/chik_puzzles.egg-info/SOURCES.txt
+src/chik_puzzles.egg-info/dependency_links.txt
+src/chik_puzzles.egg-info/requires.txt
+src/chik_puzzles.egg-info/top_level.txt

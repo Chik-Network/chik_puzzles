@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "chia-puzzles"
+name = "chik-puzzles"
 version = "0.20.1"
 dependencies = [
  "hex",

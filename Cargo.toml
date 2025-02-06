@@ -1,12 +1,12 @@
 [package]
-name = "chia-puzzles"
+name = "chik-puzzles"
 version = "0.20.1"
 edition = "2021"
 license = "Apache-2.0"
-description = "Chia primitives needed for building wallets."
-authors = ["Matt Howard <matt@chia.net>"]
-homepage = "https://github.com/Chia-Network/chia_puzzles"
-repository = "https://github.com/Chia-Network/chia_puzzles"
+description = "Chik primitives needed for building wallets."
+authors = ["Matt Howard <matt@chiknetwork.com>"]
+homepage = "https://github.com/Chik-Network/chik_puzzles"
+repository = "https://github.com/Chik-Network/chik_puzzles"
 
 [dependencies]
 hex = "0.4"

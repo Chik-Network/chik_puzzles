@@ -1,13 +1,13 @@
-# This is the file that should be run to generate the Rust and Python files with the loaded Chialisp constants.
+# This is the file that should be run to generate the Rust and Python files with the loaded Chiklisp constants.
 
 import os
-from clvm_tools_rs import compile_clvm
-from chia_puzzles_py.manage_clvm import generate_hash_bytes
+from klvm_tools_rs import compile_klvm
+from chik_puzzles_py.manage_klvm import generate_hash_bytes
 
 # This is the master list of puzzles to be exported.
 # When a new puzzle is added, it should be added to this list.
 # The format is (name, path, treehash)
-chialisp_dictionary = [
+chiklisp_dictionary = [
     # CAT Puzzles
     (
         "CAT_PUZZLE",
@@ -310,8 +310,8 @@ chialisp_dictionary = [
     ),
     # Consensus Puzzles
     (
-        "CHIALISP_DESERIALISATION",
-        "./puzzles/consensus_puzzles/chialisp_deserialisation.clsp.hex",
+        "CHIKLISP_DESERIALISATION",
+        "./puzzles/consensus_puzzles/chiklisp_deserialisation.clsp.hex",
         "94ec19077f9a34e0b11ad2456af0170f4cc03f11230ca42e3f82e6e644ac4f5d",
     ),
     (
@@ -342,20 +342,20 @@ chialisp_dictionary = [
     ),
 ]
 rust_dest_path = "./src/programs.rs"
-python_dest_path = "./chia_puzzles_py/programs.py"
+python_dest_path = "./chik_puzzles_py/programs.py"
 
 os.makedirs(os.path.dirname(rust_dest_path), exist_ok=True)
 os.makedirs(os.path.dirname(python_dest_path), exist_ok=True)
 
 with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as python_file:
-    python_file.write("# Auto-generated Python file with loaded Chialisp constants\n")
-    rust_file.write("// Auto-generated Rust file with loaded Chialisp constants\n")
+    python_file.write("# Auto-generated Python file with loaded Chiklisp constants\n")
+    rust_file.write("// Auto-generated Rust file with loaded Chiklisp constants\n")
 
     python_file.write(
-        "# This file was created from running generate_chialisp_constants.py\n\n"
+        "# This file was created from running generate_chiklisp_constants.py\n\n"
     )
     rust_file.write(
-        "// This file was created from running generate_chialisp_constants.py\n\n"
+        "// This file was created from running generate_chiklisp_constants.py\n\n"
     )
 
     rust_file.write("use hex_literal::hex;\n")
@@ -365,7 +365,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
     os.makedirs("puzzles/temp", exist_ok=True)
     temp_file = os.path.join(here, "puzzles/temp/tempfile.clsp.hex")
     try:
-        for name, file_path, hash in chialisp_dictionary:
+        for name, file_path, hash in chiklisp_dictionary:
             with open(file_path, "r") as hex_file:
                 hex_data = hex_file.read().strip().replace("\n", "").replace("\r", "")
 
@@ -380,7 +380,7 @@ with open(rust_dest_path, "w") as rust_file, open(python_dest_path, "w") as pyth
             # Check if the source code matches the committed compiled hex
             source_code_path = os.path.join(here, file_path[2:-4])
             source_code_dir = os.path.dirname(os.path.join(here, file_path))
-            compile_clvm(
+            compile_klvm(
                 input_path=source_code_path,
                 output_path=temp_file,
                 search_paths=[
