@@ -8,4 +8,6 @@ venv
 tempfile.clsp.hex
 /dist/
 .github/.tmp
+main.sym
+*.egg-info
 .idea

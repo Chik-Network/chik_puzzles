@@ -1,6 +1,6 @@
 [package]
 name = "chik-puzzles"
-version = "0.20.1"
+version = "0.20.2"
 edition = "2021"
 license = "Apache-2.0"
 description = "Chik primitives needed for building wallets."
